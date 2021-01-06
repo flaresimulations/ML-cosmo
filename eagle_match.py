@@ -6,27 +6,10 @@ import numpy as np
 import math
 import sys
 
-import eagle as E
+import eagle_IO.eagle_IO as E
 
 from sim_details import mlcosmo
-mlc = mlcosmo()
-
-# sim_tag = '/virgo/simulations/Hydrangea/C-EAGLE/HaloF0/'
-# sim_name = 'L0012N0376'
-# sim_tag = '/virgo/simulations/Eagle/L0012N0376/PE/'
-# sim_EA = sim_tag+'REFERENCE/data'
-# sim_DM = sim_tag+'DMONLY/data'
-# tag = '028_z000p000'
-# fracToFind = 0.5
-# IDsToMatch = 50
-# massLimit = 5e8
-# N_min = 5000
-# mass_diff = 6       # mass ratio
-# max_distance = 2000 # kpc
-# G = 4.302e4; # kpc (1e10 Mo)^-1 km^2 s^-2
-# unitMass = 1e10
-# unitLength = 1e3
-# Mpc = 3.08567758e22
+mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 
 output_folder = 'output/'
 
@@ -41,29 +24,25 @@ jobs = int(sys.argv[2])  # total number of processes
 # for sim in sims:
 sim = mlc.sim_hydro
 # General information
-numGroups = E.readAttribute("SUBFIND", sim, mlc.tag, "/Header/TotNgroups")
-numSubGroups = E.readAttribute("SUBFIND", sim, mlc.tag, "/Header/TotNsubgroups")
-boxSize = E.readAttribute("PARTDATA", sim, mlc.tag, "/Header/BoxSize")
-hubbleParam = E.readAttribute("PARTDATA", sim, mlc.tag, "/Header/HubbleParam")
-H = E.readAttribute("SUBFIND", sim, mlc.tag, "/Header/H(z)") * mlc.Mpc / 1000
+numGroups = E.read_header("SUBFIND", sim, mlc.tag, "TotNgroups")
+numSubGroups = E.read_header("SUBFIND", sim, mlc.tag, "TotNsubgroups")
+boxSize = E.read_header("PARTDATA", sim, mlc.tag, "BoxSize")
+hubbleParam = E.read_header("PARTDATA", sim, mlc.tag, "HubbleParam")
+H = E.read_header("SUBFIND", sim, mlc.tag, "H(z)") * mlc.Mpc / 1000
 rho_crit = 3.*(H / mlc.unitLength)**2  / (8. * math.pi * mlc.G) * mlc.unitMass
-rho_bar = E.readAttribute("PARTDATA", sim, mlc.tag, "/Header/Omega0") * rho_crit
-redshift = E.readAttribute("PARTDATA", sim, mlc.tag, "/Header/Redshift")
+rho_bar = E.read_header("PARTDATA", sim, mlc.tag, "Omega0") * rho_crit
+redshift = E.read_header("PARTDATA", sim, mlc.tag, "Redshift")
 z_int = math.floor(redshift)
 z_dec = math.floor(10.*(redshift - z_int))
-expansionFactor = E.readAttribute("PARTDATA", sim, mlc.tag, "/Header/ExpansionFactor")
+expansionFactor = E.read_header("PARTDATA", sim, mlc.tag, "ExpansionFactor")
 physicalBoxSize = boxSize / hubbleParam
-# softeningComoving = E.readAttribute("PARTDATA", sim, mlc.tag, "/RuntimePars/SofteningGas") * unitLength
-# softeningMaxPhys = E.readAttribute("PARTDATA", sim, mlc.tag, "/RuntimePars/SofteningGasMaxPhys") * unitLength
-# softening = min(softeningMaxPhys, softeningComoving * expansionFactor)
 
 
+M_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
+M_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
 
-M_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
-M_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
-
-lengthType_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubLengthType", numThreads=nthr)
-lengthType_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubLengthType", numThreads=nthr)
+lengthType_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubLengthType", numThreads=nthr)
+lengthType_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubLengthType", numThreads=nthr)
 
 
 # filter EA and DM arrays before loop
@@ -77,24 +56,24 @@ del(lengthType_DM,lengthType_EA)
 M_EA = M_EA[mask_EA]
 M_DM = M_DM[mask_DM]
 
-CoP_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/CentreOfPotential", numThreads=nthr)[mask_EA] * mlc.unitLength
-Grp_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/GroupNumber", numThreads=nthr)[mask_EA]
-Sub_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubGroupNumber", numThreads=nthr)[mask_EA]
+CoP_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/CentreOfPotential", numThreads=nthr)[mask_EA] * mlc.unitLength
+Grp_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/GroupNumber", numThreads=nthr)[mask_EA]
+Sub_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubGroupNumber", numThreads=nthr)[mask_EA]
 
-CoP_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/CentreOfPotential", numThreads=nthr)[mask_DM] * mlc.unitLength
-Grp_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/GroupNumber", numThreads=nthr)[mask_DM]
-Sub_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubGroupNumber", numThreads=nthr)[mask_DM]
+CoP_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/CentreOfPotential", numThreads=nthr)[mask_DM] * mlc.unitLength
+Grp_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/GroupNumber", numThreads=nthr)[mask_DM]
+Sub_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubGroupNumber", numThreads=nthr)[mask_DM]
 
-length_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubLength", numThreads=nthr)[mask_EA]# .astype(long)
-offset_EA = E.readArray("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubOffset", numThreads=nthr)[mask_EA]# .astype(long)
+length_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubLength", numThreads=nthr)[mask_EA]# .astype(long)
+offset_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubOffset", numThreads=nthr)[mask_EA]# .astype(long)
 
-length_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubLength", numThreads=nthr)[mask_DM]# .astype(long)
-offset_DM = E.readArray("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubOffset", numThreads=nthr)[mask_DM]# .astype(long)
+length_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubLength", numThreads=nthr)[mask_DM]# .astype(long)
+offset_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubOffset", numThreads=nthr)[mask_DM]# .astype(long)
 
 del(mask_DM,mask_EA)
 
-particleIDs_EA = E.readArray("SUBFIND_PARTICLES", mlc.sim_hydro, mlc.tag, "IDs/ParticleID", numThreads=nthr) #oldSubfindFix=True)#, numThreads=16)
-particleIDs_DM = E.readArray("SUBFIND_PARTICLES", mlc.sim_dmo, mlc.tag, "IDs/ParticleID", numThreads=nthr) #oldSubfindFix=True)#, numThreads=16)
+particleIDs_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "IDs/ParticleID", numThreads=nthr)
+particleIDs_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "IDs/ParticleID", numThreads=nthr)
 
 match_ea = np.array([])#,dtype=uint64)
 match_dm = np.array([])#,dtype=uint64)
@@ -166,7 +145,7 @@ bound_particles_EA = np.zeros((len(Sub_EA),50),dtype=int)
 
 for i in range(len(Sub_EA)):
     halo_ids = particleIDs_EA[offset_EA[i] : offset_EA[i]+length_EA[i]]
-    bound_particles_EA[i,] = halo_ids[halo_ids % 2 == 0][0:mlc.IDsToMatch]
+    bound_particles_EA[i,] = halo_ids[halo_ids % 2 == 0][:mlc.IDsToMatch]
 
 
 particles_EA = [None] * len(Sub_EA)
@@ -184,16 +163,8 @@ del(particleIDs_EA,particleIDs_DM)
 del(offset_EA,offset_DM,length_EA,length_DM)
 
 
-# 
-# output = []
-# output.append("# All halos \n")
-# output.append("# box=%4.2fMpc z=%3.2f rho_crit=%5.3f epsilon=%4.3f IDsToMatch=%d\n"%(physicalBoxSize, redshift, rho_crit, softening, IDsToMatch))
-# output.append("# Gr_EAGLE    Sub_EAGLE    Gr_DMONLY    Sub_DMONLY    frac_1    frac_2    M_EAGLE [Msun]    M_DMONLY [Msun]\n")
 
-
-output = [] # np.zeros((len(M_EA),10))
-# numb = np.size(M_EA)/jobs
-
+output = [] 
 matched_DM = []
 
 # Loop over eagle halos

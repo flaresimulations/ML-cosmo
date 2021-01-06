@@ -1,11 +1,8 @@
-##
-## Read match file, load reference and dark matter only sims,
-## match properties and write out to pickle files
-##
+"""
+Read match file, load reference and dark matter only sims, match properties and write out
+"""
 
-# import pickle as pcl
 import eagle as E
-import sys
 import math
 import numpy as np
 
@@ -20,11 +17,6 @@ redshift = float(mlc.tag[5:].replace('p','.'))
 z_int = math.floor(redshift)
 z_dec = math.floor(10.*(redshift - z_int))
 
-
-# ---- Constants
-# G = 4.302e4; # kpc (1e10 Mo)^-1 km^2 s^-2
-# unitMass = 1e10
-# unitLength = 1e3
 
 rank = 0
 output = 'output/'

@@ -1,13 +1,14 @@
 #! /bin/bash
 #SBATCH -A dp004
 #SBATCH -p cosma7
-#SBATCH --job-name=dmo_match_L0100N1504
+#SBATCH --job-name=dmo_match_CE0
 #SBATCH --output=logs/L0100N1504.%a.%N.%j.o
 #SBATCH --error=logs/L0100N1504.%a.%N.%j.e
 #SBATCH -t 0-48:00
 #SBATCH --cpus-per-task=1
 #SBATCH --array=0-15
 
+# #SBATCH --job-name=dmo_match_L0100N1504
 # #SBATCH --mem-per-cpu=3800
 # #SBATCH --ntasks=8
 # #SBATCH --mail-type=ALL
@@ -16,5 +17,6 @@
 module load pythonconda3/4.5.4
 source activate eagle
 
-python eagle_match.py $SLURM_ARRAY_TASK_ID 16 
+# python eagle_match.py $SLURM_ARRAY_TASK_ID 16 
+python match_run.py $SLURM_ARRAY_TASK_ID 16 
 

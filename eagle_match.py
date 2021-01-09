@@ -250,7 +250,7 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
 
 import pandas as pd 
 _df = pd.DataFrame(output)
-_df.to_csv(output_folder+"matchedHalosSub_%s_z%dp%d_%d.dat"%(mlc.sim_name, z_int, z_dec, rank))
+_df.to_csv(output_folder+"matchedHalosSub_%s_z%dp%d_%03d.dat"%(mlc.sim_name, z_int, z_dec, rank))
 
 
 # file = open(, 'w')

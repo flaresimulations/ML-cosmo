@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pickle 
 
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import GridSearchCV, KFold
@@ -7,12 +8,17 @@ from sklearn import preprocessing
 from sklearn.metrics import r2_score
 
 from scipy.stats import pearsonr
-
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+import seaborn as sns
 
-eagle = pd.read_csv('output/028_z000p000_match.csv')
+from sim_details import mlcosmo
+mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+output = 'output/'
+
+eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
 
 eagle['velocity_DM'] = abs(eagle['velocity_DM'])
 eagle['Subhalo_Mass_DM'] = 1.15*10**7 * eagle['length_DM']
@@ -33,7 +39,8 @@ predictors = ['M_EA','lengthType_BH_EA','BlackHoleMass_EA','BlackHoleMassAccreti
 
 
 
-mask = (eagle['FOF_Group_M_Mean200_DM'] > 1e9)# & (eagle['MassType_Stars_EA'] > 0.)
+# mask = (eagle['FOF_Group_M_Mean200_DM'] > 1e9)
+mask = (eagle['MassType_Stars_EA'] > 1e8)
 eagle = eagle[mask]
 
 print("N(excluded galaxies):",sum(mask==False))
@@ -64,6 +71,9 @@ etree = GridSearchCV(ExtraTreesRegressor(), param_grid=tuned_parameters, cv=None
 etree.fit(feature_scaler.transform(eagle[train][features]), predictor_scaler.transform(eagle[train][predictors]))
 
 print(etree.best_params_)
+
+pickle.dump(etree, open(output + mlc.sim_name + '_' + mlc.tag + '.ert.model', 'wb'))
+
 
 ## ---- Prediction
 

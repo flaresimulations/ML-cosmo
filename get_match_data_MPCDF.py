@@ -9,8 +9,11 @@ import pickle
 
 import eagle as E
 
+_config = str(sys.argv[1])
+
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_CE-0.ini')
+mlc = mlcosmo(ini=_config)
+
 
 output_folder = 'output/'
 nthr = 4

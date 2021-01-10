@@ -1,7 +1,7 @@
 """
 Read match file, load reference and dark matter only sims, match properties and write out
 """
-
+import sys
 import eagle_IO.eagle_IO as E
 import math
 import numpy as np
@@ -10,24 +10,23 @@ import glob
 
 import pandas as pd
 
+_config = str(sys.argv[1])
+
+
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini=_config)
 
 redshift = float(mlc.tag[5:].replace('p','.')) 
 z_int = math.floor(redshift)
 z_dec = math.floor(10.*(redshift - z_int))
 
 
-rank = 0
 output = 'output/'
 
-files = sorted(glob.glob("%s/matchedHalosSub_%s_z%dp%d_*.dat"%(output,mlc.sim_name, z_int, z_dec)))
-match = [None] * len(files)
-for i,f in enumerate(files): match[i] = pd.read_csv(f)
-match = pd.concat(match)
+f = "%s/matchedHalosSub_%s_%s.dat"%(output,mlc.sim_name,mlc.tag)
+match = pd.read_csv(f)
 match.reset_index(inplace=True)
 
-# match = pd.read_table(output+'matchedHalosSub_100_z0p0.dat', header=2, delim_whitespace=True)
 
 Sub_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/SubGroupNumber")
 Grp_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/GroupNumber")
@@ -127,7 +126,6 @@ data['halfMassRad_Stars_EA'] = halfMassRad_EA[:,4]
 data['halfMassRad_BH_EA'] = halfMassRad_EA[:,5]
 
 
-# InertiaTensor_EA = E.read_array("SUBFIND", sim_EA, tag, "Subhalo/InertiaTensor") # TODO: Throws a read error, investigate
 data['KineticEnergy_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/KineticEnergy")[idx_EA]
 
 data['InitialMassWeightedBirthZ_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/InitialMassWeightedBirthZ")[idx_EA]
@@ -158,31 +156,7 @@ data['StellarVelDisp_HalfMassProjRad_EA'] = E.read_array("SUBFIND", mlc.sim_hydr
 data['StarFormationRate_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate")[idx_EA]
 
 
-# ---- Save general simulation properties
-
-# master = {}
-# 
-# master["data"] = data
-# 
-# BoxSize_EA = E.readAttribute("SUBFIND", mlc.sim_hydro, mlc.tag, '/Header/BoxSize')
-# HubbleParam_EA = E.readAttribute("SUBFIND", mlc.sim_hydro, mlc.tag, '/Header/HubbleParam')
-# Redshift_EA = E.readAttribute("SUBFIND", mlc.sim_hydro, mlc.tag, '/Header/Redshift')
-# 
-# BoxSize_DM = E.readAttribute("SUBFIND", mlc.sim_dmo, mlc.tag, '/Header/BoxSize')
-# HubbleParam_DM = E.readAttribute("SUBFIND", mlc.sim_dmo, mlc.tag, '/Header/HubbleParam')
-# Redshift_DM = E.readAttribute("SUBFIND", mlc.sim_dmo, mlc.tag, '/Header/Redshift')
-# 
-# if BoxSize_DM == BoxSize_EA:
-#     master['BoxSize'] = BoxSize_EA
-# 
-# if HubbleParam_DM == HubbleParam_EA:
-#     master['HubbleParam'] = HubbleParam_EA
-# 
-# if Redshift_DM == Redshift_EA:
-#     master['Redshift'] = Redshift_EA
-
 _df = pd.DataFrame(data)
 _df.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")
 
-# pcl.dump(master, open(output + mlc.tag + "_match.p", "wb"))
 

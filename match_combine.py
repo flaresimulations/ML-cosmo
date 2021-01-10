@@ -15,6 +15,7 @@ files = sorted(glob.glob(_file))
 match = [None] * len(files)
 for i,f in enumerate(files): match[i] = pd.read_csv(f)
 match = pd.concat(match)
+match.reset_index(inplace=True)
 
 match.to_csv('%s/matchedHalosSub_%s_%s.dat'%(output,mlc.sim_name,mlc.tag))
 

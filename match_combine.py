@@ -1,10 +1,11 @@
-
+import sys
 import os
 import glob
 import pandas as pd
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_CE-0.ini')
+_config = str(sys.argv[1])
+mlc = mlcosmo(ini=_config)
 
 output = 'output/'
 

@@ -11,15 +11,16 @@ import sys
 import eagle_IO.eagle_IO as E
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_CE-0.ini')
+_config = str(sys.argv[1])
+mlc = mlcosmo(ini=_config)
 
 output_folder = 'output/'
 
 ## serial arguments
 # rank = 0
 # jobs = 1
-rank = int(sys.argv[1])  # rank of process
-jobs = int(sys.argv[2])  # total number of processes
+rank = int(sys.argv[2])  # rank of process
+jobs = int(sys.argv[3])  # total number of processes
 
 M_EA,M_DM,CoP_EA,CoP_DM,particles_DM,bound_particles_EA,\
    particles_EA,particles_DM,Grp_EA,Sub_EA,Grp_DM,Sub_DM = \

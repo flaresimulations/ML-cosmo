@@ -43,7 +43,7 @@ for i in range(len(match)):
     idx_EA.append( np.where((Grp_EA == match['Grp_EA'][i]) & (Sub_EA == match['Sub_EA'][i]))[0][0] )
     idx_DM.append( np.where((Grp_DM == match['Grp_DM'][i]) & (Sub_DM == match['Sub_DM'][i]))[0][0] )
 
-np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T)
+np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T, fmt='%i')
 
 
 # ---- Initialise Dataframe

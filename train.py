@@ -1,3 +1,4 @@
+import glob
 import pandas as pd
 import numpy as np
 import pickle 
@@ -17,8 +18,16 @@ import seaborn as sns
 from sim_details import mlcosmo
 mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 output = 'output/'
+zoom = True
 
 eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
+
+if zoom:
+    files = glob.glob(output+'CE*_029_z000p000_match.csv')
+    for f in files:
+        _dat = pd.read_csv(f)
+        eagle = pd.concat([eagle,_dat])
+
 
 eagle['velocity_DM'] = abs(eagle['velocity_DM'])
 eagle['Subhalo_Mass_DM'] = 1.15*10**7 * eagle['length_DM']
@@ -39,26 +48,18 @@ predictors = ['M_EA','lengthType_BH_EA','BlackHoleMass_EA','BlackHoleMassAccreti
 
 
 
-# mask = (eagle['FOF_Group_M_Mean200_DM'] > 1e9)
 mask = (eagle['MassType_Stars_EA'] > 1e8)
 eagle = eagle[mask]
-
-print("N(excluded galaxies):",sum(mask==False))
-
+print("N:",np.sum(mask),"\nN(excluded galaxies):",np.sum(mask==False))
 
 split = 0.8
 train = np.random.rand(len(eagle)) < split
-
-
-
 feature_scaler = preprocessing.StandardScaler().fit(eagle[train][features])
-print(feature_scaler.mean_)
-print(feature_scaler.scale_)
-
-
 predictor_scaler = preprocessing.StandardScaler().fit(eagle[train][predictors])
-print(predictor_scaler.mean_)
-print(predictor_scaler.scale_)
+# print(feature_scaler.mean_)
+# print(feature_scaler.scale_)
+# print(predictor_scaler.mean_)
+# print(predictor_scaler.scale_)
 
 
 ## ---- Cross Validation
@@ -72,7 +73,7 @@ etree.fit(feature_scaler.transform(eagle[train][features]), predictor_scaler.tra
 
 print(etree.best_params_)
 
-pickle.dump(etree, open(output + mlc.sim_name + '_' + mlc.tag + '.ert.model', 'wb'))
+# pickle.dump(etree, open(output + mlc.sim_name + '_' + mlc.tag + '.ert.model', 'wb'))
 
 
 ## ---- Prediction

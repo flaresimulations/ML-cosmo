@@ -1,0 +1,15 @@
+#! /bin/bash
+#SBATCH -A dp004
+#SBATCH -p cosma7
+#SBATCH --job-name=density_L0100
+#SBATCH --output=logs/density_L0100.%a.%N.%j.o
+#SBATCH --error=logs/density_L0100.%a.%N.%j.e
+#SBATCH -t 0-24:00
+#SBATCH --cpus-per-task=1
+#SBATCH --array=1-4
+
+module load pythonconda3/4.5.4
+source activate eagle
+
+python calculate_local_density.py config/config_cosma_L0100N1504.ini $SLURM_ARRAY_TASK_ID
+

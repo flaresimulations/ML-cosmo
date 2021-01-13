@@ -10,10 +10,8 @@ import glob
 
 import pandas as pd
 
-_config = str(sys.argv[1])
-
-
 from sim_details import mlcosmo
+_config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
 redshift = float(mlc.tag[5:].replace('p','.')) 

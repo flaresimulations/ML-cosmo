@@ -9,7 +9,9 @@ import sys
 import eagle_IO.eagle_IO as E
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+_config = str(sys.argv[1])
+mlc = mlcosmo(ini=_config)
+
 
 output_folder = 'output/'
 
@@ -18,8 +20,8 @@ nthr = 4
 ## serial arguments
 # rank = 0
 # jobs = 1
-rank = int(sys.argv[1])  # rank of process
-jobs = int(sys.argv[2])  # total number of processes
+rank = int(sys.argv[2])  # rank of process
+jobs = int(sys.argv[3])  # total number of processes
 
 # for sim in sims:
 sim = mlc.sim_hydro
@@ -183,7 +185,8 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
 #    mostBound_halo_IDs = halo_IDs[ halo_IDs % 2 == 0 ][0:IDsToMatch]
 
     # filter DM particles
-    dm_list = np.where((M_EA[i] < mlc.mass_diff * M_DM) * (M_EA[i] > (1. / mlc.mass_diff) * M_DM ) * (((cop_ea_mid[i] == cop_dm_mid) | (cop_ea_mid[i] == cop_dm_up) | (cop_ea_mid[i] == cop_dm_down)).sum(axis=1) == 3))[0]
+    dm_list = np.where((M_EA[i] < mlc.mass_diff * M_DM) * (M_EA[i] > (1. / mlc.mass_diff) * M_DM ) *\
+            (((cop_ea_mid[i] == cop_dm_mid) | (cop_ea_mid[i] == cop_dm_up) | (cop_ea_mid[i] == cop_dm_down)).sum(axis=1) == 3))[0]
 
     dm_list = np.delete(dm_list,matched_DM)
 
@@ -250,7 +253,7 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
 
 import pandas as pd 
 _df = pd.DataFrame(output)
-_df.to_csv(output_folder+"matchedHalosSub_%s_z%dp%d_%03d.dat"%(mlc.sim_name, z_int, z_dec, rank))
+_df.to_csv(output_folder+"matchedHalosSub_%s_%s_%03d.dat"%(mlc.sim_name, mlc.tag, rank))
 
 
 # file = open(, 'w')

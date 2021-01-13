@@ -77,8 +77,14 @@ del(particleIDs_EA,particleIDs_DM)
 del(offset_EA,offset_DM,length_EA,length_DM)
 
 
-pickle.dump([M_EA,M_DM,CoP_EA,CoP_DM,particles_DM,bound_particles_EA,
+pickle.dump([M_EA,M_DM,CoP_EA,CoP_DM,bound_particles_EA,
              particles_EA,particles_DM,Grp_EA,Sub_EA,Grp_DM,Sub_DM],
-            open(output_folder + mlc.sim_name + "_match_data.p",'wb'))
+            open(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.p",'wb'))
+
+# pickle.dump([M_EA,CoP_EA,bound_particles_EA,particles_EA,Grp_EA,Sub_EA],
+#             open(output_folder + mlc.sim_name + "_match_data_EA.p",'wb'))
+# 
+# pickle.dump([M_DM,CoP_DM,particles_DM,Grp_DM,Sub_DM],
+#             open(output_folder + mlc.sim_name + "_match_data_DM.p",'wb'))
 
 

@@ -17,15 +17,13 @@ indexes = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', dty
 
 eagle_mass = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass") * 1e10
 
-unmatched = ~np.in1d(range(len(eagle_mass)), indexes[:,0]) 
-# unmatched_dmo = ~pd.Series(range(len(eagle_dmo))).isin(pickle_data['idx_DM'])
+unmatched = ~np.in1d(range(len(eagle_mass)), indexes[:,1]) 
 
 ## Matched fraction
 m_limit = 1e9
-print(np.sum(eagle_mass[indexes[:,0]] > m_limit) / np.sum(eagle_mass > m_limit))
+print(np.sum(eagle_mass[indexes[:,1]] > m_limit) / np.sum(eagle_mass > m_limit))
 
 
-## Histogram of subhalo masses
 massBinLimits = np.linspace(5.2, 15.4, 52)
 massBins = np.logspace(5.3, 15.3, 51)
 binWidths = []
@@ -34,7 +32,7 @@ for i,z in enumerate(massBins):
 
 ## ---- Halo mass completeness histogram
 
-count_match, dummy = np.histogram(np.log10(eagle_mass[indexes[:,0]]), 
+count_match, dummy = np.histogram(np.log10(eagle_mass[indexes[:,1]]), 
                                   bins=massBinLimits)
 
 count_full, dummy = np.histogram(np.log10(eagle_mass[unmatched]), 
@@ -45,8 +43,8 @@ count_total = count_match + count_full
 
 fig,ax1 = plt.subplots(1,1,figsize=(15,4))
 
-ax1.bar(massBins, count_match / count_total, width=binWidths) 
-ax1.bar(massBins, count_full / count_total, bottom=count_match / count_total, width=binWidths)
+# ax1.bar(massBins, count_match / count_total, width=binWidths) 
+ax1.step(massBins, count_match / count_total) 
 
 ax1.set_xlabel('Total Subhalo Mass ($M_{\odot}$)', fontsize=13)
 ax1.legend(['Matched','Unmatched'], bbox_to_anchor=(1.15, 1), fontsize=13)

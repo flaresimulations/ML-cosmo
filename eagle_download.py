@@ -35,14 +35,17 @@ Sub_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubGroupNumber",
 
 # ---- Find index of matches in subhalo arrays
 
-idx_EA = []
-idx_DM = []
-for i in range(len(match)):
-    idx_EA.append( np.where((Grp_EA == match['Grp_EA'][i]) & (Sub_EA == match['Sub_EA'][i]))[0][0] )
-    idx_DM.append( np.where((Grp_DM == match['Grp_DM'][i]) & (Sub_DM == match['Sub_DM'][i]))[0][0] )
+# idx_EA = []
+# idx_DM = []
+# for i in range(len(match)):
+#     idx_EA.append( np.where((Grp_EA == match['Grp_EA'][i]) & (Sub_EA == match['Sub_EA'][i]))[0][0] )
+#     idx_DM.append( np.where((Grp_DM == match['Grp_DM'][i]) & (Sub_DM == match['Sub_DM'][i]))[0][0] )
+# 
+# np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T, fmt='%i')
 
-np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T, fmt='%i')
-
+_idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt')
+idx_EA = _idx[:,0].astype(int) 
+idx_DM = _idx[:,1].astype(int)  
 
 # ---- Initialise Dataframe
 
@@ -62,7 +65,7 @@ data['halfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/
 data['KE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/KineticEnergy", numThreads=nthr)[idx_DM]
 data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/TotalEnergy", numThreads=nthr)[idx_DM]  #TODO: what's included in this?
 
-#data['M_DM'] = E.read_array("SUBFIND", sim_DM, tag, "Subhalo/MassType_DM")[idx_DM] * unitMass doesn't exist for DMO, need to multiply particle number by dark matter mass
+data['M_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass")[idx_DM] * mlc.unitMass # doesn't exist for DMO, need to multiply particle number by dark matter mass
 data['MassTwiceHalfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/MassTwiceHalfMassRad", numThreads=nthr)[idx_DM,1] * mlc.unitMass
 
 data['velocity_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Velocity", numThreads=nthr)[idx_DM,1]

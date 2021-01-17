@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,13 +10,23 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 import seaborn as sns
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+# mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 
 output = 'output/'
-galaxy_pred = pd.read_csv('%sprediction_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
-eagle = pd.read_csv('%sfeatures_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
+output_name = mlc.sim_name
+
+etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
+        pickle.load(open(output + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
 
 train = eagle['train_mask']
+
+galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(\
+                           etree.predict(feature_scaler.transform(\
+                           eagle[~train][features]))),columns=predictors)
+
+
+
 
 def vplot_data(feature):
     vdata = pd.DataFrame(np.log10(np.ma.array(galaxy_pred[feature])), columns=[feature])
@@ -28,15 +39,6 @@ def vplot_data(feature):
     vdata['dummy'] = 'A'
     return vdata
 
-
-# fig = plt.figure(figsize=(16,16))
-# gs = gridspec.GridSpec(2,13)
-# ax1 = fig.add_subplot(gs[0,0:4])
-# ax2 = fig.add_subplot(gs[0,4:8])
-# ax3 = fig.add_subplot(gs[0,8:12])
-# ax4 = fig.add_subplot(gs[1,0:4])
-# ax5 = fig.add_subplot(gs[1,4:8])
-# ax6 = fig.add_subplot(gs[1,8:12])
 
 fig,(ax1,ax2,ax3,ax4,ax5,ax6) = plt.subplots(1,6,figsize=(16,6))
 axes = [ax1,ax2,ax3,ax4,ax5,ax6]

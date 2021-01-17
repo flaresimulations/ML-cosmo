@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,13 +10,22 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 import seaborn as sns
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+# mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 
 output = 'output/'
-galaxy_pred = pd.read_csv('%sprediction_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
-eagle = pd.read_csv('%sfeatures_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
+output_name = mlc.sim_name
+
+etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
+        pickle.load(open(output + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
 
 train = eagle['train_mask']
+
+galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(\
+                           etree.predict(feature_scaler.transform(\
+                           eagle[~train][features]))),columns=predictors)
+
+
 
 
 preds = ['Stars_Mass_EA', 'MassType_Gas_EA', 'BlackHoleMass_EA',

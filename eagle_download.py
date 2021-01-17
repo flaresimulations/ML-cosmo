@@ -14,9 +14,7 @@ from sim_details import mlcosmo
 _config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
-redshift = float(mlc.tag[5:].replace('p','.')) 
-z_int = math.floor(redshift)
-z_dec = math.floor(10.*(redshift - z_int))
+density = True
 nthr=16
 
 output = 'output/'
@@ -79,23 +77,23 @@ data['length_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubLe
 
 data['FOF_NumOfSubhalos_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/NumOfSubhalos", numThreads=nthr)[data['Grp_DM']]
 
-data['FOF_GroupMass_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/GroupMass", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_GroupLength_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/GroupLength", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_ContaminationMass_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/ContaminationMass", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit200", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Crit2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit2500", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Crit500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit500", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Mean200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean200", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Mean2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean2500", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_Mean500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean500", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
-data['FOF_Group_M_TopHat200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_TopHat200", numThreads=nthr)[data['Grp_DM']] * mlc.unitMass
+data['FOF_GroupMass_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/GroupMass", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_GroupLength_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/GroupLength", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_ContaminationMass_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/ContaminationMass", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit200", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Crit2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit2500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Crit500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Crit500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Mean200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean200", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Mean2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean2500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_Mean500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_Mean500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
+data['FOF_Group_M_TopHat200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_M_TopHat200", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitMass
 
-data['FOF_Group_R_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit200", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_Group_R_Crit2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit2500", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_Group_R_Crit500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit500", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_Group_R_Mean200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean200", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_Group_R_Mean2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean2500", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
-data['FOF_Group_R_Mean500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean500", numThreads=nthr)[data['Grp_DM']] * mlc.unitLength
+data['FOF_Group_R_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit200", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_Group_R_Crit2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit2500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_Group_R_Crit500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Crit500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_Group_R_Mean200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean200", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_Group_R_Mean2500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean2500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
+data['FOF_Group_R_Mean500_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "FOF/Group_R_Mean500", numThreads=nthr)[data['Grp_DM']-1] * mlc.unitLength
 
 
 
@@ -110,7 +108,7 @@ data['lengthType_Gas_EA'] = lengthType_EA[:,0]
 data['lengthType_Stars_EA'] = lengthType_EA[:,4]
 data['lengthType_BH_EA'] = lengthType_EA[:,5]
 
-data['BlackHoleMass_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass", numThreads=nthr)[idx_EA]
+data['BlackHoleMass_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass", numThreads=nthr)[idx_EA] * mlc.unitMass
 data['BlackHoleMassAccretionRate_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMassAccretionRate", numThreads=nthr)[idx_EA]
 
 GasSpin_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/GasSpin", numThreads=nthr)[idx_EA]
@@ -156,6 +154,15 @@ data['StellarVelDisp_HalfMassProjRad_EA'] = E.read_array("SUBFIND", mlc.sim_hydr
 
 data['StarFormationRate_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate", numThreads=nthr)[idx_EA]
 
+data['Subhalo_Mass_DM'] = 1.15*10**7 * data['length_DM']
+data['Satellite'] = (data['Sub_DM'] != 0).astype(int)
+
+if density:
+    data['Density_R1'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R1.txt')
+    data['Density_R2'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R2.txt')
+    data['Density_R4'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R4.txt')
+    data['Density_R8'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R8.txt')
+    # data['Density_R16'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R16.txt')
 
 _df = pd.DataFrame(data)
 _df.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")

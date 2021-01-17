@@ -21,12 +21,16 @@ _idx = int(sys.argv[2])
 R = radii[_idx]
 V = volumes[_idx]
 
-dR = 0.
-Rmax = np.max(radii) + dR
-
 output='output/'
 _idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', dtype=int)
+idx_EA = _idx[:,0]
 idx_DM = _idx[:,1]
+
+mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
+                     "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
+
+
+match_indexes = np.where(mstar > 1e8)[0]
 
 
 if zoom:
@@ -47,13 +51,17 @@ else:
     # density_output = {r: np.zeros(len(CoP)) for r in radii}
     _out = np.zeros(len(CoP))
     step=1000
+
+
     
     # for R,V in zip(radii,volumes):
     print("Radius: %02d Mpc"%R)
     for i in range(0, len(CoP), step):
-        cop_tree = cKDTree(CoP[i:i+step], boxsize=100)
+        print(i)
+        idxs = match_indexes[i:i+step]
+        cop_tree = cKDTree(CoP[idxs], boxsize=100)
         N_part = cop_tree.query_ball_tree(_tree,r=R)
-        _out[i:i+step] = [len(_t) for _t in N_part]
+        _out[idxs] = [len(_t) for _t in N_part]
         
     _out *= dm_pmass * (1./_fact) * (1./V)
 

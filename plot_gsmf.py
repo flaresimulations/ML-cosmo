@@ -71,20 +71,21 @@ def calc_df(x, binLimits, volume):
 
 binLimits = np.linspace(7.9, 13.9, 21)
 bins = np.linspace(8.05, 13.75, 20)
+lw = 3
 
 phi, phi_sigma = calc_df(np.log10(mstar), binLimits, 100**3)
-plt.plot(bins, np.log10(phi), label='True (Ref-100)', lw=2)
+plt.plot(bins, np.log10(phi), label='True (Ref-100)', lw=lw)
 
 phi, phi_sigma = calc_df(np.log10(mstar_AGNdT9), binLimits, 50**3)
-plt.plot(bins, np.log10(phi), label='True (AGNdT9-50)', lw=2)
+plt.plot(bins, np.log10(phi), label='True (AGNdT9-50)', lw=lw)
 
 phi, phi_sigma = calc_df(np.log10(galaxy_pred_L0050['Stars_Mass_EA']), 
                          binLimits, 100**3)
-plt.plot(bins, np.log10(phi), label='L0050 Prediction', lw=2)
+plt.plot(bins, np.log10(phi), label='L0050 Prediction', lw=lw)
 
 phi, phi_sigma= calc_df(np.log10(galaxy_pred_L0050_zoom['Stars_Mass_EA']), 
                         binLimits, 100**3)
-plt.plot(bins, np.log10(phi), label='L0050-zoom Prediction', lw=2)
+plt.plot(bins, np.log10(phi), label='L0050-zoom Prediction', lw=lw)
 
 plt.legend()
 plt.xlim(8,)

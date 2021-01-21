@@ -20,9 +20,12 @@ from sim_details import mlcosmo
 # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 output = 'output/'
-zoom = False
+model_dir = 'models/'
 
-output_name = mlc.sim_name # + '_zoom'
+zoom = False
+density = True
+# output_name = mlc.sim_name + '_zoom' + '_density'
+output_name = mlc.sim_name + '_density'
 
 eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
 
@@ -34,18 +37,19 @@ if zoom:
 
 
 eagle['velocity_DM'] = abs(eagle['velocity_DM'])
-eagle['Subhalo_Mass_DM'] = 1.15*10**7 * eagle['length_DM']
-eagle['Satellite'] = (eagle['Sub_DM'] != 0).astype(int)
-eagle['BlackHoleMass_EA'] *= mlc.unitMass
 
 features = ['FOF_Group_M_Crit200_DM',
             'FOF_Group_R_Crit200_DM',
-            'Subhalo_Mass_DM',
+            'M_DM', #'Subhalo_Mass_DM',
             'MassTwiceHalfMassRad_DM',
             'velocity_DM',
             'Vmax_DM',
             'VmaxRadius_DM',
             'Satellite']
+
+if density:
+    [features.append(d) for d in ['Density_R1','Density_R2','Density_R4','Density_R8','Density_R16']]
+
 
 features_pretty = ['$M_{\mathrm{Crit,200}}$',
                    '$R_{\mathrm{Crit,200}}$',
@@ -54,7 +58,11 @@ features_pretty = ['$M_{\mathrm{Crit,200}}$',
                    '$v$',
                    '$v_{\mathrm{max}}$',
                    '$R_{v_{\mathrm{max}}}$',
-                   'Satellite?']
+                   'Satellite?',
+                   '$\\rho (R = 1 \, \mathrm{Mpc})$',
+                   '$\\rho (R = 2 \, \mathrm{Mpc})$',
+                   '$\\rho (R = 4 \, \mathrm{Mpc})$',
+                   '$\\rho (R = 8 \, \mathrm{Mpc})$']
 
 predictors = [
               # 'M_EA','lengthType_BH_EA',
@@ -101,16 +109,19 @@ etree.fit(feature_scaler.transform(eagle[train][features]), predictor_scaler.tra
 
 print(etree.best_params_)
 
-# pickle.dump(etree, open(output + mlc.sim_name + '_' + mlc.tag + '.ert.model', 'wb'))
-
-
-## ---- Prediction
-galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(etree.predict(feature_scaler.transform(eagle[~train][features]))),columns=predictors)
-
 eagle['train_mask'] = train
-predictors.append('train_mask')
-galaxy_pred.to_csv('%sprediction_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
-eagle[predictors].to_csv('%sfeatures_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
+
+pickle.dump([etree, features, predictors, feature_scaler, predictor_scaler, eagle], 
+            open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'wb'))
+
+
+# ## ---- Prediction
+# galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(etree.predict(feature_scaler.transform(eagle[~train][features]))),columns=predictors)
+# 
+# 
+# 
+# galaxy_pred.to_csv('%sprediction_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
+# eagle[predictors].to_csv('%sfeatures_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
 
 # ## ---- Feature importance
 # 

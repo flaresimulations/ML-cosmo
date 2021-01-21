@@ -13,6 +13,7 @@ mlc = mlcosmo(ini=_config)
 
 nthr=16
 zoom=False
+boxsize=50
 
 radii = [1,2,4,8,16]
 volumes = [(4./3) * np.pi * r**3 for r in radii]
@@ -26,11 +27,7 @@ _idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', dtype=
 idx_EA = _idx[:,0]
 idx_DM = _idx[:,1]
 
-mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
 
-
-match_indexes = np.where(mstar > 1e8)[0]
 
 
 if zoom:
@@ -44,9 +41,14 @@ else:
     CoP = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
                  "Subhalo/CentreOfPotential", numThreads=nthr, noH=True)[idx_DM] 
 
-    _fact = 1e-2
+    mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
+                     "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
+
+    match_indexes = np.where(mstar > 1e8)[0]
+
+    _fact = 1e-1
     mask = np.random.rand(len(particle_pos)) < _fact
-    _tree = cKDTree(particle_pos[mask], boxsize=100) 
+    _tree = cKDTree(particle_pos[mask], boxsize=boxsize) 
 
     # density_output = {r: np.zeros(len(CoP)) for r in radii}
     _out = np.zeros(len(CoP))

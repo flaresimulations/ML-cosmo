@@ -42,7 +42,7 @@ Sub_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubGroupNumber",
 # np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T, fmt='%i')
 
 _idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt')
-idx_EA = _idx[:,0].astype(int) 
+idx_EA = _idx[:,0].astype(int)
 idx_DM = _idx[:,1].astype(int)  
 
 # ---- Initialise Dataframe
@@ -66,7 +66,9 @@ data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/TotalEner
 data['M_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass")[idx_DM] * mlc.unitMass # doesn't exist for DMO, need to multiply particle number by dark matter mass
 data['MassTwiceHalfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/MassTwiceHalfMassRad", numThreads=nthr)[idx_DM,1] * mlc.unitMass
 
-data['velocity_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Velocity", numThreads=nthr)[idx_DM,1]
+_vel = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Velocity", numThreads=nthr)[idx_DM,:]
+data['velocity_DM'] = np.sqrt(np.sum(_vel**2, axis=1))
+
 data['Vmax_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Vmax", numThreads=nthr)[idx_DM]
 data['VmaxRadius_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/VmaxRadius", numThreads=nthr)[idx_DM]
 
@@ -158,12 +160,12 @@ data['Subhalo_Mass_DM'] = 1.15*10**7 * data['length_DM']
 data['Satellite'] = (data['Sub_DM'] != 0).astype(int)
 
 if density:
-    data['Density_R1'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R1.txt')
-    data['Density_R2'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R2.txt')
-    data['Density_R4'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R4.txt')
-    data['Density_R8'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R8.txt')
-    # data['Density_R16'] = np.loadtxt('output/density_L0100N1504_028_z000p000_R16.txt')
+    data['Density_R1'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R1.txt')
+    data['Density_R2'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R2.txt')
+    data['Density_R4'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R4.txt')
+    data['Density_R8'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R8.txt')
+    data['Density_R16'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R16.txt')
 
-_df = pd.DataFrame(data)
-_df.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")
+
+data.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")
 

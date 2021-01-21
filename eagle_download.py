@@ -61,7 +61,9 @@ data['halfMassProjRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subh
 data['halfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/HalfMassRad", numThreads=nthr)[idx_DM,1] * mlc.unitLength
 
 data['KE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/KineticEnergy", numThreads=nthr)[idx_DM]
-data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/TotalEnergy", numThreads=nthr)[idx_DM]  #TODO: what's included in this?
+data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/TotalEnergy", numThreads=nthr)[idx_DM]
+data['PotentialEnergy_DM'] = data['TE_DM'] - data['KE_DM']
+
 
 data['M_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass")[idx_DM] * mlc.unitMass # doesn't exist for DMO, need to multiply particle number by dark matter mass
 data['MassTwiceHalfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/MassTwiceHalfMassRad", numThreads=nthr)[idx_DM,1] * mlc.unitMass

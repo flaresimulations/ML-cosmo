@@ -23,9 +23,9 @@ output = 'output/'
 model_dir = 'models/'
 
 zoom = False
-density = True
+density = False
 # output_name = mlc.sim_name + '_zoom' + '_density'
-output_name = mlc.sim_name + '_density'
+output_name = mlc.sim_name #+ '_density'
 
 eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
 
@@ -39,11 +39,11 @@ if zoom:
 eagle['velocity_DM'] = abs(eagle['velocity_DM'])
 
 features = ['FOF_Group_M_Crit200_DM',
-            'FOF_Group_R_Crit200_DM',
-            'M_DM', #'Subhalo_Mass_DM',
-            'MassTwiceHalfMassRad_DM',
+            'M_DM',
+            'halfMassRad_DM',
             'velocity_DM',
             'Vmax_DM',
+            'PotentialEnergy_DM',
             'VmaxRadius_DM',
             'Satellite']
 

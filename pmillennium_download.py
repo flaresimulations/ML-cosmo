@@ -21,6 +21,7 @@ SubHalfMass = np.zeros(Nsub)
 SubVel = np.zeros((Nsub,3))
 SubVmax = np.zeros(Nsub)
 SubRVmax = np.zeros(Nsub)
+SubPotentialEnergy = np.zeros(Nsub)
 FirstSub = np.zeros(Ngrp, dtype=int)
 
 
@@ -44,6 +45,7 @@ for f in files:
     SubVel[j:j_max] = subtab["SubVel"][...] 
     SubVmax[j:j_max] = subtab["SubVmax"][...] 
     SubRVmax[j:j_max] = subtab["SubRVmax"][...] 
+    SubPotentialEnergy[j:j_max] = subtab["SubPotentialEnergy"][...] 
     FirstSub[i:i_max] = subtab["FirstSub"][...] 
 
     i += Ngrp_f
@@ -56,13 +58,15 @@ Satellite = np.ones(Nsub,dtype=int)
 Satellite[FirstSub.astype(int)] = 0
 
 data = pd.DataFrame(SubGrNr, columns=['SubGrNr'])
-data['Halo_M_Crit200'] = Halo_M_Crit200[SubGrNr.astype(int)] * 1e10
-data['SubMass'] = SubLen * p_mass
-data['SubHalfMass'] = SubHalfMass
-data['SubVel'] = np.sqrt(np.sum(SubVel**2,axis=1))
-data['SubVmax'] = SubVmax
-data['SubRVmax'] = SubRVmax
+data['FOF_Group_M_Crit200_DM'] = Halo_M_Crit200[SubGrNr.astype(int)] * 1e10
+data['M_DM'] = SubLen * p_mass
+data['halfMassRad_DM'] = SubHalfMass
+data['velocity_DM'] = np.sqrt(np.sum(SubVel**2,axis=1))
+data['Vmax_DM'] = SubVmax
+data['VmaxRadius_DM'] = SubRVmax
+data['PotentialEnergy_DM'] = SubPotentialEnergy
 data['Satellite'] = Satellite
+
 
 output = 'output/'
 data.to_csv(output + 'PMillennium' + '_' + 'z000p000' + "_dmo.csv")

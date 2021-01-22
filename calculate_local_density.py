@@ -12,67 +12,92 @@ _config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
 nthr=16
-zoom=False
-boxsize=50
+zoom=True
+boxsize=float(sys.argv[2])
 
 radii = [1,2,4,8,16]
 volumes = [(4./3) * np.pi * r**3 for r in radii]
 
-_idx = int(sys.argv[2])
-R = radii[_idx]
-V = volumes[_idx]
+# _idx = int(sys.argv[2])
+# R = radii[_idx]
+# V = volumes[_idx]
 
 output='output/'
-_idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', dtype=int)
-idx_EA = _idx[:,0]
-idx_DM = _idx[:,1]
+indexes = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', dtype=int)
+idx_EA = indexes[:,0]
+idx_DM = indexes[:,1]
+    
+## ---- Run density calculation on high-res particles
 
+particle_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
+                            "PartType1/Coordinates", numThreads=nthr, noH=True)
 
+dm_pmass = E.read_header("SNAPSHOT", mlc.sim_dmo, mlc.tag, "MassTable")[1]
 
+CoP = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
+             "Subhalo/CentreOfPotential", numThreads=nthr, noH=True)[idx_DM] 
 
-if zoom:
-    print("do zoom stuff")
-else:
-    particle_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
-                                "PartType1/Coordinates", numThreads=nthr, noH=True)
+mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
+                 "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
 
-    dm_pmass = E.read_header("SNAPSHOT", mlc.sim_dmo, mlc.tag, "MassTable")[1]
+match_indexes = np.where(mstar > 1e8)[0]
 
-    CoP = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                 "Subhalo/CentreOfPotential", numThreads=nthr, noH=True)[idx_DM] 
+_fact = 5e-2
+mask = np.random.rand(len(particle_pos)) < _fact
+_tree = cKDTree(particle_pos[mask], boxsize=boxsize) 
 
-    mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
+del(particle_pos)
 
-    match_indexes = np.where(mstar > 1e8)[0]
-
-    _fact = 1e-1
-    mask = np.random.rand(len(particle_pos)) < _fact
-    _tree = cKDTree(particle_pos[mask], boxsize=boxsize) 
-
-    # density_output = {r: np.zeros(len(CoP)) for r in radii}
+for R,V in zip(radii,volumes):
+    print("Radius: %02d Mpc"%R)
+    
     _out = np.zeros(len(CoP))
     step=1000
-
-
-    
-    # for R,V in zip(radii,volumes):
-    print("Radius: %02d Mpc"%R)
     for i in range(0, len(CoP), step):
         print(i)
         idxs = match_indexes[i:i+step]
-        cop_tree = cKDTree(CoP[idxs], boxsize=100)
+        cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
         N_part = cop_tree.query_ball_tree(_tree,r=R)
         _out[idxs] = [len(_t) for _t in N_part]
+    
+    
+    _out *= dm_pmass * mlc.unitMass * (1./_fact)
+    
+    if zoom:
+        boxsize=3200
+        cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
+    
+        p2_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
+                              "PartType2/Coordinates", numThreads=nthr, noH=True)  
+        p3_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
+                              "PartType3/Coordinates", numThreads=nthr, noH=True)  
+        p2_mass = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
+                               "PartType2/Mass", numThreads=nthr, noH=True)  
+        p3_mass = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
+                               "PartType3/Mass", numThreads=nthr, noH=True)  
         
-    _out *= dm_pmass * (1./_fact) * (1./V)
-
-np.savetxt(output + 'density_' + mlc.sim_name + '_' + mlc.tag + '_R' + str(R) + ".txt",_out)
-
-# eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
-# 
-# for R in radii:
-#     eagle['density_%02d_Mpc'] = density_output[R]
-# 
-# eagle.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")
-
+        _tree2 = cKDTree(p2_pos, boxsize=boxsize) 
+        del(p2_pos)
+        N_part = cop_tree.query_ball_tree(_tree2,r=R)
+        
+        sum_p2_mass = np.zeros(len(match_indexes))
+        for i,idxs in enumerate(N_part):
+            if len(idxs) > 0:
+                sum_p2_mass[i] =  np.sum(p2_mass[np.array(idxs)]) * 1e10
+        
+        _tree3 = cKDTree(p3_pos, boxsize=boxsize) 
+        del(p3_pos)
+        N_part = cop_tree.query_ball_tree(_tree3,r=R)
+        
+        sum_p3_mass = np.zeros(len(match_indexes))
+        for i,idxs in enumerate(N_part):
+            if len(idxs) > 0:
+                sum_p3_mass[i] =  np.sum(p3_mass[np.array(idxs)]) * 1e10
+    
+        _out[match_indexes] += sum_p2_mass + sum_p3_mass
+    
+    
+    _out *= (1./V)
+    
+    np.savetxt(output + 'density_' + mlc.sim_name + '_' + mlc.tag + '_R' + str(R) + ".txt",_out)
+    

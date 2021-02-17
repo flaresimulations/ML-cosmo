@@ -19,9 +19,9 @@ fig, (ax1,ax2,ax3,ax4,ax5,ax6) = plt.subplots(1,6,figsize=(18,4))
 axes = [ax1,ax2,ax3,ax4,ax5,ax6]
 
 for output_name,marker,c in zip(
-        ['L0050N0752','L0050N0752_density','L0050N0752_zoom',#'L0050N0752_zoom_density',
-         'L0100N1504','L0100N1504_density','L0100N1504_zoom',#'L0100N1504_zoom_density'
-         ], ['o','*','X','o','*','X'], ['C0','C0','C0','C1','C1','C1']):
+        ['L0050N0752','L0050N0752_density','L0050N0752_zoom','L0050N0752_zoom_density',
+         'L0100N1504','L0100N1504_density'], 
+        ['o','*','o','*','o','*'], ['C0','C0','C2','C2','C1','C1']):
 
     etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
             pickle.load(open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
@@ -45,7 +45,7 @@ for output_name,marker,c in zip(
     
     for ax,label in zip(axes, ['$M_{\star}$', '$M_{\mathrm{gas}}$','$M_{\\bullet}$', 
                                '$v_{\mathrm{disp},\star}$','$\mathrm{SFR}$', '$Z_{\star}$']):
-        ax.text(0.9,0.05,label,transform=ax.transAxes, horizontalalignment='right', fontsize=40)
+        ax.text(0.9,0.05,label,transform=ax.transAxes, horizontalalignment='right', fontsize=20)
 
     for ax in axes: 
         ax.set_ylim(0.5,1); ax.grid(alpha=0.5)
@@ -58,13 +58,15 @@ for output_name,marker,c in zip(
 
 L100_patch = mpatches.Patch(color='C1', label='L100Ref')
 L050_patch = mpatches.Patch(color='C0', label='L050AGN')
-line_ = Line2D([0], [0], color='black', marker='o', linestyle='none', label='Periodic')
-line_dens = Line2D([0], [0], color='black', marker='*', linestyle='none', label='Periodic+Density')
-line_zoom = Line2D([0], [0], color='black', marker='X', linestyle='none', label='Periodic+Zoom')
+L050_zoom_patch = mpatches.Patch(color='C2', label='L050AGN\n+ZoomAGN')
+line_ = Line2D([0], [0], color='black', marker='o', linestyle='none', label='No density')
+line_dens = Line2D([0], [0], color='black', marker='*', linestyle='none', label='+ Density')
+# line_zoom = Line2D([0], [0], color='black', marker='X', linestyle='none', label='Periodic+Zoom')
 # line_denszoom = Line2D([0], [0], color='black', marker='D', linestyle='none', label='+Density+Zoom')
-ax1.legend(handles=[L100_patch,L050_patch, line_, line_dens, line_zoom],# line_denszoom])#,
-           frameon=False, loc=6)#, prop={'size': 13});
-plt.show()
-# fname = 'plots/fit_comparison.png'
-# plt.savefig(fname, dpi=150, bbox_inches='tight')
+ax1.legend(handles=[L100_patch,L050_patch, L050_zoom_patch, line_, line_dens],# line_denszoom])#,
+           frameon=False, loc=6, prop={'size': 13});
+
+# plt.show()
+fname = 'plots/fit_comparison.pdf'; print(fname)
+plt.savefig(fname, dpi=300, bbox_inches='tight')
 

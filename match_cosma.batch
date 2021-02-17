@@ -1,18 +1,27 @@
 #! /bin/bash
 #SBATCH -A dp004
-#SBATCH -p cosma7
-#SBATCH --job-name=dmo_match_L0100N1504
-#SBATCH --output=logs/L0100N1504.%a.%N.%j.o
-#SBATCH --error=logs/L0100N1504.%a.%N.%j.e
-#SBATCH -t 0-18:00
+#SBATCH -p cosma6
+#SBATCH -t 0-06:00
 #SBATCH --cpus-per-task=1
-#SBATCH --array=0-31
+#SBATCH --array=0-15
+#SBATCH --job-name=dmo_match_CE24
+#SBATCH --output=logs/CE24.%a.%N.%j.o
+#SBATCH --error=logs/CE24.%a.%N.%j.e
+
+# #SBATCH --job-name=dmo_match_L0050N0752
+# #SBATCH --output=logs/L0050N0752.%a.%N.%j.o
+# #SBATCH --error=logs/L0050N0752.%a.%N.%j.e
+
+# #SBATCH --job-name=dmo_match_L0100N1504
+# #SBATCH --output=logs/L0100N1504.%a.%N.%j.o
+# #SBATCH --error=logs/L0100N1504.%a.%N.%j.e
 
 module load pythonconda3/4.5.4
 source activate eagle
 
 # python eagle_match.py $SLURM_ARRAY_TASK_ID 16 
-# python match_run.py config/config_CE-9.ini $SLURM_ARRAY_TASK_ID 16 
+# python match_run.py config/config_CE-0.ini $SLURM_ARRAY_TASK_ID 16 
+python match_run.py config/config_CE-24.ini $SLURM_ARRAY_TASK_ID 16 
 # python match_run.py config/config_cosma_L0050N0752.ini $SLURM_ARRAY_TASK_ID 16 
-python match_run.py config/config_cosma_L0100N1504.ini $SLURM_ARRAY_TASK_ID 32
+# python match_run.py config/config_cosma_L0100N1504.ini $SLURM_ARRAY_TASK_ID 16
 

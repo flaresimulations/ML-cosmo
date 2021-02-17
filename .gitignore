@@ -1,5 +1,7 @@
-output/*.txt
+output/*.csv
 output/*.dat
+output/*.txt
+output/*.p
 logs/*.o
 logs/*.e
 

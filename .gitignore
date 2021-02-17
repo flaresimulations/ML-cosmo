@@ -1,3 +1,5 @@
+output/*.txt
+output/*.dat
 logs/*.o
 logs/*.e
 

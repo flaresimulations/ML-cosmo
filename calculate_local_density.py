@@ -11,11 +11,11 @@ from sim_details import mlcosmo
 _config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
-nthr=16
+nthr=8
 zoom=True
 boxsize=float(sys.argv[2])
 
-radii = [1,2,4,8,16]
+radii = [4,8]#,16][1,2
 volumes = [(4./3) * np.pi * r**3 for r in radii]
 
 # _idx = int(sys.argv[2])
@@ -37,12 +37,18 @@ dm_pmass = E.read_header("SNAPSHOT", mlc.sim_dmo, mlc.tag, "MassTable")[1]
 CoP = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
              "Subhalo/CentreOfPotential", numThreads=nthr, noH=True)[idx_DM] 
 
-mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                 "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
+shm = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
+                   "Subhalo/Mass", numThreads=nthr, noH=True)[idx_DM]  * mlc.unitMass
 
-match_indexes = np.where(mstar > 1e8)[0]
+# mcrit200 = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
+#                         "FOF/Group_M_Crit200", numThreads=nthr)[idx_DM] * mlc.unitMass
 
-_fact = 5e-2
+# mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
+#                  "Subhalo/Stars/Mass", numThreads=nthr)[idx_EA] * mlc.unitMass
+
+match_indexes = np.where((shm > 1e10))[0]
+
+_fact = 2e-3
 mask = np.random.rand(len(particle_pos)) < _fact
 _tree = cKDTree(particle_pos[mask], boxsize=boxsize) 
 

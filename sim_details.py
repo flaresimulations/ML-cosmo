@@ -1,5 +1,6 @@
 import configparser
 import numpy as np
+from scipy.stats import binned_statistic
 
 class mlcosmo:
 
@@ -31,4 +32,17 @@ class mlcosmo:
         self.unitLength = float(config['Constants']['unitLength'])
         self.Mpc = float(config['Constants']['Mpc'])
 
+
+    def find_percs(self, x, y, binLimits, bin_lim=10):
+        
+        # ignore bins with less than ten objects
+        bin_mask = np.histogram(x, binLimits)[0] > bin_lim
+    
+        percentiles = np.array([binned_statistic(x, y, statistic=lambda \
+                                y: np.percentile(y, p), bins=binLimits)[0] for p in [16,50,84]])
+        
+        sigma = binned_statistic(x, y, statistic=lambda \
+                                 y: np.std(y), bins=binLimits)[0]
+    
+        return percentiles, sigma, bin_mask
 

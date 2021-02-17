@@ -47,34 +47,49 @@ def count_plots(configs):
 
 
 ## C-EAGLE match stats (run on mpcdf)
-configs = ['config/config_CE-%i.ini'%i for i in np.arange(30)]
-count_plot = count_plots(configs)
-count_plot = {key: list(count_plot[key]) for key,item in count_plot.items()}
+# configs = ['config/config_CE-%i.ini'%i for i in np.arange(30)]
+# count_plot = count_plots(configs)
+# count_plot = {key: list(count_plot[key]) for key,item in count_plot.items()}
+# with open('output/match_stats_mpcdf.json','w') as f: 
+#     json.dump(count_plot,f)
 with open('output/match_stats_mpcdf.json','w') as f: 
-    json.dump(count_plot,f)
-
+    count_plot = json.load(f)
 
 ## Periodic match stats
-configs = [#'config/config_cosma_L0050N0752.ini',
-           #'config/config_cosma_L0100N1504.ini',
-           'config/config_CE-0.ini',
-           'config/config_CE-1.ini']
+configs = ['config/config_cosma_L0050N0752.ini',
+           'config/config_cosma_L0100N1504.ini']
 
-configs_pretty = ['L0050N0752','L0100N1504']
+count_plot_periodic = count_plots(configs)
 
-count_plot = count_plots(configs)
+# count_plot_merge = {**count_plot, **count_plot_periodic} 
+
+configs_pretty = ['CE%i'%i for i in np.arange(30)]
+configs_pretty += ['L0050N0752','L0100N1504']
+
+
+massBinLimits = np.linspace(5.2, 15.4, 52)
+massBins = np.logspace(5.3, 15.3, 51)
+binWidths = []
+for i,z in enumerate(massBins):
+    binWidths.append((10**massBinLimits[i+1]) - (10**massBinLimits[i]))
 
 
 fig,ax1 = plt.subplots(1,1,figsize=(15,4))
 
-for _config,pretty in zip(configs,configs_pretty):
-    ax1.step(massBins, count_plot[_config], label=pretty, lw=3) 
+for _config,pretty in zip(count_plot.keys(),configs_pretty[:-2]):
+    ax1.step(massBins, count_plot_merge[_config], 
+             lw=2, linestyle='dotted', color='black') 
+
+    
+for _config,pretty in zip(count_plot_periodic.keys(),configs_pretty[-2:]):
+    ax1.step(massBins, count_plot_merge[_config], label=pretty, lw=3) 
+
 
 ax1.set_xlabel('$M_{\mathrm{subhalo}} \,/\, \mathrm{M_{\odot}}$', fontsize=13)
 ax1.set_ylabel('$f_{\mathrm{match}}$', fontsize=13)
-ax1.legend(loc=4)#bbox_to_anchor=(1.15, 1), fontsize=13)
+ax1.legend(loc=4, frameon=False)
 
-ax1.set_xlim(1e8,8e14)
+ax1.set_xlim(1e8,5e15)
 ax1.hlines(1.0,ax1.get_xlim()[0],ax1.get_xlim()[1], linestyle='dashed', alpha=0.5)
 ax1.set_ylim(0,1.05)
 ax1.set_xscale('log')

@@ -22,24 +22,29 @@ output = 'output/'
 
 dmo = pd.read_csv('output/PMillennium_z000p000_dmo.csv')
 # dmo = pd.read_csv('output/PMillennium_z000p000_dmo_subset.csv')
-# dmo = dmo[dmo['FOF_Group_M_Crit200_DM'] > 2e9].reset_index()
-dmo = dmo[dmo['M_DM'] > 1e9].reset_index()
+# dmo = dmo[].reset_index()
+dmo = dmo.loc[(dmo['M_DM'] > 1e10) & (dmo['FOF_Group_M_Crit200_DM'] > 5e9)].reset_index(drop=True)
 pmill_V = 800**3 # (100 / 0.6777)**3
 # dmo['PotentialEnergy_DM'] *= 1e-3
 
-
 ## Load original EAGLE ref prediction
 mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass") * mlc.unitMass
+shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                   "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
+mask = shm > 1e10
+mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                     "Subhalo/Stars/Mass", numThreads=nthr)[mask] * mlc.unitMass
 
 ## Load original EAGLE AGNdT9 prediction
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
-mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass") * mlc.unitMass
+shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                             "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
+mask = shm > 1e10
+mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                             "Subhalo/Stars/Mass", numThreads=nthr)[mask] * mlc.unitMass
+
 
 ## Load predictions
-
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 output_name = mlc.sim_name # + '_zoom'
 model_dir = 'models/'
@@ -74,38 +79,39 @@ def calc_df(x, binLimits, volume):
     return phi, phi_sigma
 
 
-binLimits = np.linspace(7.9, 16.9, 31)
-bins = np.linspace(8.05, 16.75, 30)
+binLimits = np.linspace(4.9, 13.9, 31)
+bins = np.linspace(5.05, 13.75, 30)
 
-phi_pred, phi_sigma = calc_df(np.log10(galaxy_pred_L0050['Stars_Mass_EA']), 
-                         binLimits, pmill_V)
 
-phi_pred_zoom, phi_sigma= calc_df(np.log10(galaxy_pred_L0050_zoom['Stars_Mass_EA']), 
-                        binLimits, pmill_V)
 
 
 fig, ax = plt.subplots(1,1, figsize=(6,7))
 lw = 3
 
 phi, phi_sigma = calc_df(np.log10(mstar), binLimits, 100**3)
-ax.plot(bins, np.log10(phi), label='Ref-100', lw=lw, c='C1')
+ax.plot(bins, np.log10(phi), label='L100Ref', lw=lw, c='C1')
 
 phi, phi_sigma = calc_df(np.log10(mstar_AGNdT9), binLimits, 50**3)
-ax.plot(bins, np.log10(phi), label='AGNdT9-50', lw=lw, c='C2')
+ax.plot(bins, np.log10(phi), label='L050AGN', lw=lw, c='C2')
 
-ax.plot(bins, np.log10(phi_pred), label='P-Millennium Prediction', lw=lw, c='C0', linestyle='dashed')
-ax.plot(bins, np.log10(phi_pred_zoom), label='P-Millennium Prediction (+zoom)', lw=lw, c='C0')
+phi_pred, phi_sigma = calc_df(galaxy_pred_L0050['Stars_Mass_EA'], binLimits, pmill_V)
+ax.plot(bins, np.log10(phi_pred), label='L050AGN\n(Prediction on P-Millennium)', 
+        lw=lw, c='C0', linestyle='dashed')
 
-ax.axvspan(8, 9, alpha=0.1, color='grey')
+phi_pred_zoom, phi_sigma= calc_df(galaxy_pred_L0050_zoom['Stars_Mass_EA'], binLimits, pmill_V)
+ax.plot(bins, np.log10(phi_pred_zoom), label='L050AGN+Zoom\n(Prediction on P-Millennium)', 
+        lw=lw, c='C0')
+
+ax.axvspan(7, 8, alpha=0.1, color='grey')
 
 ax.legend()
 ax.grid(alpha=0.5)
-ax.set_xlim(8,13)
-ax.set_ylim(-6.5,0.5)
+ax.set_xlim(7,13)
+ax.set_ylim(-8,-0.5)
 ax.set_xlabel('$\mathrm{log_{10}}(M_{\star} \,/\, \mathrm{M_{\odot}})$')
 ax.set_ylabel('$\mathrm{log_{10}}(\phi \,/\, \mathrm{Mpc^{3} \; dex^{-1}})$')
 
 # plt.show()
 fname = 'plots/gsmf_pmillennium.png'
-plt.savefig(fname, dpi=150, bbox_inches='tight')
+plt.savefig(fname, dpi=300, bbox_inches='tight')
 

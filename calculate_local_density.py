@@ -42,7 +42,7 @@ mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
 
 match_indexes = np.where(mstar > 1e8)[0]
 
-_fact = 5e-2
+_fact = 1e-2
 mask = np.random.rand(len(particle_pos)) < _fact
 _tree = cKDTree(particle_pos[mask], boxsize=boxsize) 
 

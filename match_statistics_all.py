@@ -12,16 +12,19 @@ from sim_details import mlcosmo
 
 output = 'output/'
 
+massBinLimits = np.linspace(5.2, 15.4, 52)
+massBins = np.logspace(5.3, 15.3, 51)
+binWidths = []
+for i,z in enumerate(massBins):
+    binWidths.append((10**massBinLimits[i+1]) - (10**massBinLimits[i]))
 
-def count_plots(configs):
-    massBinLimits = np.linspace(5.2, 15.4, 52)
-    massBins = np.logspace(5.3, 15.3, 51)
-    binWidths = []
-    for i,z in enumerate(massBins):
-        binWidths.append((10**massBinLimits[i+1]) - (10**massBinLimits[i]))
+
+def count_plots(configs, massBins, massBinLimits):
 
     m_limit = 1e9
     count_plot = {}
+    count_match = {}
+    count_total = {}
     
     for _config in configs:
         mlc = mlcosmo(ini=_config)
@@ -32,23 +35,23 @@ def count_plots(configs):
         eagle_mass = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/Mass") * 1e10
 
         unmatched = ~np.in1d(range(len(eagle_mass)), indexes[:,1]) 
-        # print(_config, '\n', np.sum(eagle_mass[indexes[:,1]] > m_limit) / np.sum(eagle_mass > m_limit))
 
-        count_match, dummy = np.histogram(np.log10(eagle_mass[indexes[:,1]]), 
+        count_match[_config], dummy = np.histogram(np.log10(eagle_mass[indexes[:,1]]), 
                                           bins=massBinLimits)
 
         count_full, dummy = np.histogram(np.log10(eagle_mass[unmatched]), 
                                          bins=massBinLimits)
 
-        count_total = count_match + count_full
-        count_plot[_config] = count_match / count_total
+        count_total[_config] = count_match[_config] + count_full
+        count_plot[_config] = count_match[_config] / count_total[_config]
 
-    return count_plot
+    return count_plot, count_match, count_total
 
 
 ## C-EAGLE match stats (run on mpcdf)
-# configs = ['config/config_CE-%i.ini'%i for i in np.arange(30)]
-# count_plot = count_plots(configs)
+configs = ['config/config_CE-%i.ini'%i for i in np.arange(30)]
+count_plot, count_match, count_total = count_plots(configs, massBins, massBinLimits)
+
 # count_plot = {key: list(count_plot[key]) for key,item in count_plot.items()}
 # with open('output/match_stats_mpcdf.json','w') as f: 
 #     json.dump(count_plot,f)
@@ -59,19 +62,12 @@ with open('output/match_stats_mpcdf.json','r') as f:
 configs = ['config/config_cosma_L0050N0752.ini',
            'config/config_cosma_L0100N1504.ini']
 
-count_plot_periodic = count_plots(configs)
+count_plot_periodici, count_match, count_total = count_plots(configs, massBins, massBinLimits)
 
 count_plot_merge = {**count_plot, **count_plot_periodic} 
 
 configs_pretty = ['CE%i'%i for i in np.arange(30)]
 configs_pretty += ['L050AGN','L100Ref']
-
-
-massBinLimits = np.linspace(5.2, 15.4, 52)
-massBins = np.logspace(5.3, 15.3, 51)
-binWidths = []
-for i,z in enumerate(massBins):
-    binWidths.append((10**massBinLimits[i+1]) - (10**massBinLimits[i]))
 
 
 fig,ax1 = plt.subplots(1,1,figsize=(15,4))

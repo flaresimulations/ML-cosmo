@@ -52,7 +52,7 @@ def count_plots(configs):
 # count_plot = {key: list(count_plot[key]) for key,item in count_plot.items()}
 # with open('output/match_stats_mpcdf.json','w') as f: 
 #     json.dump(count_plot,f)
-with open('output/match_stats_mpcdf.json','w') as f: 
+with open('output/match_stats_mpcdf.json','r') as f: 
     count_plot = json.load(f)
 
 ## Periodic match stats
@@ -61,10 +61,10 @@ configs = ['config/config_cosma_L0050N0752.ini',
 
 count_plot_periodic = count_plots(configs)
 
-# count_plot_merge = {**count_plot, **count_plot_periodic} 
+count_plot_merge = {**count_plot, **count_plot_periodic} 
 
 configs_pretty = ['CE%i'%i for i in np.arange(30)]
-configs_pretty += ['L0050N0752','L0100N1504']
+configs_pretty += ['L050AGN','L100Ref']
 
 
 massBinLimits = np.linspace(5.2, 15.4, 52)
@@ -76,9 +76,13 @@ for i,z in enumerate(massBins):
 
 fig,ax1 = plt.subplots(1,1,figsize=(15,4))
 
-for _config,pretty in zip(count_plot.keys(),configs_pretty[:-2]):
-    ax1.step(massBins, count_plot_merge[_config], 
-             lw=2, linestyle='dotted', color='black') 
+for i,(_config,pretty) in enumerate(zip(count_plot.keys(),configs_pretty[:-2])):
+    if i==0:
+        ax1.step(massBins, count_plot_merge[_config], 
+                 lw=2, linestyle='dotted', color='black', label='ZoomAGN') 
+    else:
+        ax1.step(massBins, count_plot_merge[_config], 
+                 lw=2, linestyle='dotted', color='black') 
 
     
 for _config,pretty in zip(count_plot_periodic.keys(),configs_pretty[-2:]):
@@ -94,6 +98,6 @@ ax1.hlines(1.0,ax1.get_xlim()[0],ax1.get_xlim()[1], linestyle='dashed', alpha=0.
 ax1.set_ylim(0,1.05)
 ax1.set_xscale('log')
 
-plt.show()
-# fname = 'plots/match_statistics.png'
-# plt.savefig(fname, dpi=150, bbox_inches='tight')
+# plt.show()
+fname = 'plots/match_statistics.png'
+plt.savefig(fname, dpi=150, bbox_inches='tight')

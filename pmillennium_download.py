@@ -12,7 +12,7 @@ G = 4.302e4
 unitMass = 1e10
 unitLength = 1e3
 Mpc = 3.08567758e22
-
+_h = 0.6777
 
 
 fname = "/cosma5/data/jch/L800/Runs/KEEP/data/groups_271/subhalo_tab_271.*" 
@@ -73,16 +73,16 @@ data = pd.DataFrame(SubGrNr, columns=['SubGrNr'])
 
 Gr_indexes = np.zeros(len(GrNr),dtype=int)
 Gr_indexes[GrNr] = np.arange(len(GrNr))
-data['FOF_Group_M_Crit200_DM'] = Halo_M_Crit200[Gr_indexes[SubGrNr]] * 1e10
+data['FOF_Group_M_Crit200_DM'] = (Halo_M_Crit200[Gr_indexes[SubGrNr]]*1e10)/_h
 data['Nsubs'] = Nsubs[Gr_indexes[SubGrNr]]
 
-p_mass = 1.06e8 / 0.6777
+p_mass = 1.06e8 / _h
 data['M_DM'] = SubLen * p_mass
-data['halfMassRad_DM'] = SubHalfMass * unitLength
+data['halfMassRad_DM'] = (SubHalfMass * unitLength) / _h
 data['velocity_DM'] = np.sqrt(np.sum(SubVel**2,axis=1))
 data['Vmax_DM'] = SubVmax
-data['VmaxRadius_DM'] = SubRVmax
-data['PotentialEnergy_DM'] = SubPotentialEnergy * unitLength 
+data['VmaxRadius_DM'] = SubRVmax / _h
+data['PotentialEnergy_DM'] = SubPotentialEnergy * (1./unitLength) 
 # data['BindingEnergy_DM'] = SubBindingEnergy
 data['Satellite'] = Satellite
 

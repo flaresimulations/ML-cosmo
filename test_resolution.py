@@ -77,10 +77,6 @@ ax1.set_xlabel('$M_{\star} \,/\, \mathrm{M_{\odot}}$',size=14)
 ax1.set_ylabel('$N$',size=14)
 ax2.set_ylabel('$\mathrm{Completeness}$',size=14)
 
-plt.show() 
-# fname = 'plots/stellar_mass_completeness.png' 
-# print(fname)
-# plt.savefig(fname, dpi=150, bbox_inches='tight') 
-
-
-
+# plt.show() 
+fname = 'plots/stellar_mass_completeness.png'; print(fname)
+plt.savefig(fname, dpi=300, bbox_inches='tight') 

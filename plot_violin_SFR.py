@@ -95,7 +95,7 @@ ax2.text(0.24, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}
 ax3.text(0.1, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}} < 10^{-3}$', 
          size=14, transform=ax3.transAxes)
 
-plt.show()
-# fname = 'plots/violins_SFR_%s.png'%mlc.sim_name; print(fname)
-# plt.savefig(fname, dpi=150, bbox_inches='tight')
+# plt.show()
+fname = 'plots/violins_SFR_%s.png'%mlc.sim_name; print(fname)
+plt.savefig(fname, dpi=150, bbox_inches='tight')
 

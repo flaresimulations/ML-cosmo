@@ -74,5 +74,4 @@ for ax,pred,pretty,_lims in zip(axes, preds, preds_pretty, ax_lims):
 
 # plt.show()
 fname = 'plots/joint_plots_%s.png'%mlc.sim_name; print(fname)
-plt.savefig(fname, dpi=150, bbox_inches='tight')
-
+plt.savefig(fname, dpi=300, bbox_inches='tight')

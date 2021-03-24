@@ -64,14 +64,21 @@ preds_pretty = ['$\mathrm{log_{10}}(M_{\star}\,/\,\mathrm{M_{\odot}})$',
                 '$\mathrm{log_{10}}(v_{\star,\mathrm{disp}})$',
                 '$\mathrm{log_{10}}(Z_{*})$']#,
 #                '$\mathrm{log_{10}}(SFR \,/\, \mathrm{M_{\odot}\, yr^{-1}})$']
-ax_lims = [[4.8,12],[5.9,12],[4.8,7],[1,2.2],[-5.1,-1],[-3.5,0.8]]
+ax_lims = [[4.8,12],[5.9,12],[5.15,6],[0.5,2.2],[-5.25,-1]]#,[-3.5,0.8]]
 zero_vals = np.array([6, 4, 4, 1, -4, -4.9])
+bandwidths = ['scott','scott',0.1,'scott','scott']
+kgrid = [None,None,200,200,None]
 
-for ax,pred,pretty,_lims,zero_val in zip(axes, preds, preds_pretty, ax_lims, zero_vals):
+for ax,pred,pretty,_lims,zero_val,_bw,_k in zip(axes,preds,preds_pretty,ax_lims,
+                                                zero_vals,bandwidths,kgrid):
 
     vdata = vplot_data(pred,zero_val)
-    sns.violinplot(x='dummy', y=pred, hue='type', split=True, data=vdata, 
-                   palette="Set2", inner='quartile', ax=ax, cut=0)
+    if _k:
+        sns.violinplot(x='dummy', y=pred, hue='type', split=True, data=vdata, 
+                       palette="Set2", inner='quartile', ax=ax, cut=0, bw=_bw, gridsize=_k)
+    else:
+        sns.violinplot(x='dummy', y=pred, hue='type', split=True, data=vdata, 
+                       palette="Set2", inner='quartile', ax=ax, cut=0, bw=_bw)
 
     ax.legend_.remove()
     ax.set_ylabel('')
@@ -90,4 +97,3 @@ ax1.legend(loc=4, fontsize=13, frameon=False)
 # plt.show()
 fname = 'plots/violins_%s.png'%mlc.sim_name; print(fname)
 plt.savefig(fname, dpi=150, bbox_inches='tight')
-

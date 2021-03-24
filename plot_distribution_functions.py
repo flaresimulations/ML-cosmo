@@ -15,7 +15,6 @@ import eagle_IO.eagle_IO as E
 from sim_details import mlcosmo
 
 
-V = 100**3 # Mpc^3
 output = 'output/'
 nthr=2
 
@@ -25,30 +24,30 @@ nthr=2
 # dmo = pd.read_csv('output/%s_%s_dmo.csv'%(mlc.sim_name, mlc.tag))
 pmill_V = 100**3 # (100 / 0.6777)**3
 
-# dmo = pd.read_csv('output/PMillennium_z000p000_dmo.csv')
-dmo = pd.read_csv('output/PMillennium_z000p000_dmo_subset.csv')
+dmo = pd.read_csv('output/PMillennium_z000p000_dmo.csv')
+# dmo = pd.read_csv('output/PMillennium_z000p000_dmo_subset.csv')
 dmo = dmo[(dmo['FOF_Group_M_Crit200_DM'] > 5e9) & (dmo['M_DM'] > 1e10)].reset_index()
 pmill_V = 800**3 # (100 / 0.6777)**3
 
 
 ## Load original EAGLE ref prediction
 mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass") * mlc.unitMass
+shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass", noH=True) * mlc.unitMass
 mask = shm > 1e10
-mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass")[mask] * mlc.unitMass
-mbh = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass")[mask] * mlc.unitMass
-sfr = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate")[mask]
-met = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Metallicity")[mask]
+mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass", noH=True)[mask] * mlc.unitMass
+mbh = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass", noH=True)[mask] * mlc.unitMass
+sfr = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate", noH=True)[mask]
+met = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Metallicity", noH=True)[mask]
 
 
 ## Load original EAGLE AGNdT9
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
-shm_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass") * mlc.unitMass
+shm_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass", noH=True) * mlc.unitMass
 mask = shm_AGNdT9 > 1e10
-mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass")[mask]*mlc.unitMass
-mbh_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass")[mask]*mlc.unitMass
-sfr_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate")[mask]
-met_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Metallicity")[mask]
+mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass", noH=True)[mask]*mlc.unitMass
+mbh_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/BlackHoleMass", noH=True)[mask]*mlc.unitMass
+sfr_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StarFormationRate", noH=True)[mask]
+met_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Metallicity", noH=True)[mask]
 
 # load zoom + L050 AGNdT9 
 zoomL050 = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
@@ -150,7 +149,7 @@ ax1.fill_between(bins[bin_mask], percentiles[0][bin_mask], percentiles[2][bin_ma
 
 percentiles, sigma, bin_mask = mlc.find_percs(galaxy_pred_L0050_zoom['Stars_Mass_EA'],
                                               galaxy_pred_L0050_zoom['BlackHoleMass_EA'], binLimits)
-ax1.plot(bins, percentiles[1], label='L050AGN+ZoomAGN (Prediction)', lw=lw, c='C0')
+ax1.plot(bins, percentiles[1], label='L050AGN+ZoomAGN\n(Prediction on P-Millennium)', lw=lw, c='C0')
 ax1.fill_between(bins, percentiles[0], percentiles[2], alpha=_alpha, color='C0')
 
 ## star forming sequence
@@ -166,19 +165,23 @@ ax2.plot(bins, percentiles[1], label='AGNdT9-50', lw=lw, c='C2')
 ax2.fill_between(bins[bin_mask], percentiles[0][bin_mask], percentiles[2][bin_mask], 
                  alpha=_alpha, color='C2')
 
-percentiles, sigma, bin_mask = mlc.find_percs(np.log10(zoomL050['Stars_Mass_EA']), 
-                           np.log10(zoomL050['StarFormationRate_EA']), binLimits)
+mask = (zoomL050['StarFormationRate_EA'] / zoomL050['Stars_Mass_EA']) > ssfr_lim
+percentiles, sigma, bin_mask = mlc.find_percs(np.log10(zoomL050['Stars_Mass_EA'][mask]), 
+                           np.log10(zoomL050['StarFormationRate_EA'][mask]), binLimits)
 ax2.plot(bins, percentiles[1], label='AGNdT9-50', lw=lw, c='C3')
 ax2.fill_between(bins[bin_mask], percentiles[0][bin_mask], percentiles[2][bin_mask], 
                  alpha=_alpha, color='C3')
 
-mask = (10**galaxy_pred_L0050_zoom['StarFormationRate_EA'] /\
-        10**galaxy_pred_L0050_zoom['Stars_Mass_EA']) > ssfr_lim
+mask = (galaxy_pred_L0050_zoom['StarFormationRate_EA'] -\
+        galaxy_pred_L0050_zoom['Stars_Mass_EA']) > np.log10(ssfr_lim)
 percentiles, sigma, bin_mask = mlc.find_percs(galaxy_pred_L0050_zoom['Stars_Mass_EA'][mask],
                                    galaxy_pred_L0050_zoom['StarFormationRate_EA'][mask], binLimits)
 ax2.plot(bins, percentiles[1], label='Zoom-pred', lw=lw, c='C0')
 ax2.fill_between(bins[bin_mask], percentiles[0][bin_mask], percentiles[2][bin_mask], 
                  alpha=_alpha, color='C0')
+
+x = np.linspace(8,13)
+ax2.plot(x, x+np.log10(ssfr_lim), linestyle='dotted')
 
 ## metallity-stellar mass relation
 percentiles, sigma, bin_mask = mlc.find_percs(np.log10(mstar), np.log10(met), binLimits)

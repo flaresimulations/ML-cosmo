@@ -51,7 +51,8 @@ def count_plots(configs, massBins, massBinLimits):
 ## C-EAGLE match stats (run on mpcdf)
 configs = ['config/config_CE-%i.ini'%i for i in np.arange(30)]
 count_plot, count_match, count_total = count_plots(configs, massBins, massBinLimits)
-
+print("N_match:", np.sum([np.sum(count_match[_config][massBins > 1e10]) for _config in configs]))
+print("N_total:", np.sum([np.sum(count_total[_config][massBins > 1e10]) for _config in configs]))
 # count_plot = {key: list(count_plot[key]) for key,item in count_plot.items()}
 # with open('output/match_stats_mpcdf.json','w') as f: 
 #     json.dump(count_plot,f)
@@ -62,7 +63,10 @@ with open('output/match_stats_mpcdf.json','r') as f:
 configs = ['config/config_cosma_L0050N0752.ini',
            'config/config_cosma_L0100N1504.ini']
 
-count_plot_periodici, count_match, count_total = count_plots(configs, massBins, massBinLimits)
+count_plot_periodic, count_match, count_total = count_plots(configs, massBins, massBinLimits)
+
+print("N_match:", [np.sum(count_match[_config][massBins > 1e10]) for _config in configs])
+print("N_total:", [np.sum(count_total[_config][massBins > 1e10]) for _config in configs])
 
 count_plot_merge = {**count_plot, **count_plot_periodic} 
 

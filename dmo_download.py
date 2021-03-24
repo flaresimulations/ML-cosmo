@@ -15,41 +15,41 @@ Grp_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag,
 data = pd.DataFrame()
 
 data['FOF_Group_M_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                 "FOF/Group_M_Crit200", numThreads=nthr)[Grp_DM-1] * mlc.unitMass
+                 "FOF/Group_M_Crit200", numThreads=nthr, noH=True)[Grp_DM-1] * mlc.unitMass
 
 # data['FOF_Group_R_Crit200_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
 #                  "FOF/Group_R_Crit200", numThreads=nthr)[Grp_DM-1] * mlc.unitLength
 
 data['M_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                            "Subhalo/Mass") * mlc.unitMass 
+                            "Subhalo/Mass", noH=True) * mlc.unitMass 
 
 # data['MassTwiceHalfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
 #                "Subhalo/MassTwiceHalfMassRad", numThreads=nthr)[:,1] * mlc.unitMass
 
 data['halfMassRad_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/HalfMassRad", 
-        numThreads=nthr)[:,1] * mlc.unitLength
+        numThreads=nthr, noH=True)[:,1] * mlc.unitLength
 
 data['velocity_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                                   "Subhalo/Velocity", numThreads=nthr)[:,1]
+                                   "Subhalo/Velocity", numThreads=nthr, noH=True)[:,1]
 
 data['Vmax_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                               "Subhalo/Vmax", numThreads=nthr)
+                               "Subhalo/Vmax", numThreads=nthr, noH=True)
 
 data['VmaxRadius_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                                     "Subhalo/VmaxRadius", numThreads=nthr)
+                                     "Subhalo/VmaxRadius", numThreads=nthr, noH=True)
 
 # data['length_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
 #                                  "Subhalo/SubLength", numThreads=nthr)
 # data['Subhalo_Mass_DM'] = 1.15*10**7 * data['length_DM']
 
 data['Sub_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                              "Subhalo/SubGroupNumber", numThreads=nthr)
+                              "Subhalo/SubGroupNumber", numThreads=nthr, noH=True)
 
 data['KE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                             "Subhalo/KineticEnergy", numThreads=nthr)
+                             "Subhalo/KineticEnergy", numThreads=nthr, noH=True)
 
 data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
-                             "Subhalo/TotalEnergy", numThreads=nthr)
+                             "Subhalo/TotalEnergy", numThreads=nthr, noH=True)
 
 data['PotentialEnergy_DM'] = data['TE_DM'] - data['KE_DM']
 

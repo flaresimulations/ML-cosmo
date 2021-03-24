@@ -16,32 +16,33 @@ from sim_details import mlcosmo
 
 V = 100**3 # Mpc^3
 output = 'output/'
-
+nthr = 4
 
 ## Load DMO simulation
 
 dmo = pd.read_csv('output/PMillennium_z000p000_dmo.csv')
-# dmo = pd.read_csv('output/PMillennium_z000p000_dmo_subset.csv')
-# dmo = dmo[].reset_index()
-dmo = dmo.loc[(dmo['M_DM'] > 1e10) & (dmo['FOF_Group_M_Crit200_DM'] > 5e9)].reset_index(drop=True)
 pmill_V = 800**3 # (100 / 0.6777)**3
-# dmo['PotentialEnergy_DM'] *= 1e-3
+# dmo = pd.read_csv('output/PMillennium_z000p000_dmo_subset.csv')
+# pmill_V = (100 / 0.6777)**3
+
+dmo = dmo.loc[(dmo['M_DM'] > 1e10) & (dmo['FOF_Group_M_Crit200_DM'] > 5e9)].reset_index(drop=True)
+dmo['PotentialEnergy_DM'] *= 1e-2
 
 ## Load original EAGLE ref prediction
 mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-                   "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
+                   "Subhalo/Mass", numThreads=nthr, noH=True) * mlc.unitMass
 mask = shm > 1e10
 mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-                     "Subhalo/Stars/Mass", numThreads=nthr)[mask] * mlc.unitMass
+                     "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[mask] * mlc.unitMass
 
 ## Load original EAGLE AGNdT9 prediction
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-                             "Subhalo/Mass", numThreads=nthr) * mlc.unitMass
+                             "Subhalo/Mass", numThreads=nthr, noH=True) * mlc.unitMass
 mask = shm > 1e10
 mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-                             "Subhalo/Stars/Mass", numThreads=nthr)[mask] * mlc.unitMass
+                             "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[mask] * mlc.unitMass
 
 
 ## Load predictions
@@ -82,9 +83,6 @@ def calc_df(x, binLimits, volume):
 binLimits = np.linspace(4.9, 13.9, 31)
 bins = np.linspace(5.05, 13.75, 30)
 
-
-
-
 fig, ax = plt.subplots(1,1, figsize=(6,7))
 lw = 3
 
@@ -104,6 +102,23 @@ ax.plot(bins, np.log10(phi_pred_zoom), label='L050AGN+Zoom\n(Prediction on P-Mil
 
 ax.axvspan(7, 8, alpha=0.1, color='grey')
 
+from obs_data.baldry_12 import baldry_12
+
+yerr = np.array([np.log10(baldry_12['phi']) - \
+                    np.log10(baldry_12['phi']-baldry_12['err']),
+        np.log10(baldry_12['phi']+baldry_12['err']) - \
+                    np.log10(baldry_12['phi'])])
+
+upp_limits = np.isinf(yerr)[0]
+baldry_12['phi'][upp_limits] = baldry_12['phi'][upp_limits] + baldry_12['err'][upp_limits]
+
+yerr[np.isinf(yerr)] = 0.6 # -1 * np.log10(baldry_12['phi'][np.isinf(yerr)[0]])
+
+ax.errorbar(baldry_12['logM'], np.log10(baldry_12['phi']),
+            yerr=yerr, uplims=upp_limits, color='grey', marker='o', linestyle='none')
+
+
+
 ax.legend()
 ax.grid(alpha=0.5)
 ax.set_xlim(7,13)
@@ -111,7 +126,7 @@ ax.set_ylim(-8,-0.5)
 ax.set_xlabel('$\mathrm{log_{10}}(M_{\star} \,/\, \mathrm{M_{\odot}})$')
 ax.set_ylabel('$\mathrm{log_{10}}(\phi \,/\, \mathrm{Mpc^{3} \; dex^{-1}})$')
 
-# plt.show()
-fname = 'plots/gsmf_pmillennium.png'
-plt.savefig(fname, dpi=300, bbox_inches='tight')
+plt.show()
+# fname = 'plots/gsmf_pmillennium.png'
+# plt.savefig(fname, dpi=300, bbox_inches='tight')
 

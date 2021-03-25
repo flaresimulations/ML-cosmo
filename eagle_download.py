@@ -1,14 +1,13 @@
 """
 Read match file, load reference and dark matter only sims, match properties and write out
 """
-import sys
-import eagle_IO.eagle_IO as E
-import math
-import numpy as np
+import os, sys, math
 
 import glob
-
+import numpy as np
 import pandas as pd
+
+import eagle_IO.eagle_IO as E
 
 from sim_details import mlcosmo
 _config = str(sys.argv[1])
@@ -32,16 +31,21 @@ Sub_DM = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, "Subhalo/SubGroupNumber",
 
 
 # ---- Find index of matches in subhalo arrays
+_fname = output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt'
+if not os.path.isfile(_fname):
+    idx_EA = []
+    idx_DM = []
+    for i in range(len(match)):
+        idx_EA.append( np.where((Grp_EA == match['Grp_EA'][i]) & (Sub_EA == match['Sub_EA'][i]))[0][0] )
+        idx_DM.append( np.where((Grp_DM == match['Grp_DM'][i]) & (Sub_DM == match['Sub_DM'][i]))[0][0] )
+    
+    np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', 
+               np.array([idx_EA,idx_DM]).T, fmt='%i')
 
-# idx_EA = []
-# idx_DM = []
-# for i in range(len(match)):
-#     idx_EA.append( np.where((Grp_EA == match['Grp_EA'][i]) & (Sub_EA == match['Sub_EA'][i]))[0][0] )
-#     idx_DM.append( np.where((Grp_DM == match['Grp_DM'][i]) & (Sub_DM == match['Sub_DM'][i]))[0][0] )
-# 
-# np.savetxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt', np.array([idx_EA,idx_DM]).T, fmt='%i')
+    _idx = np.array([idx_EA,idx_DM]).T
+else:
+    _idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt')
 
-_idx = np.loadtxt(output + mlc.sim_name + '_' + mlc.tag + '_indexes.txt')
 idx_EA = _idx[:,0].astype(int)
 idx_DM = _idx[:,1].astype(int)  
 

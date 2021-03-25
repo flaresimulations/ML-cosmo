@@ -11,11 +11,12 @@ from sim_details import mlcosmo
 _config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
-nthr=8
-zoom=True
-boxsize=float(sys.argv[2])
 
-radii = [4,8]#,16][1,2
+zoom=bool(sys.argv[2])
+boxsize=mlc.boxsize # float(sys.argv[2])
+nthr=8
+
+radii = [1,2,4,8]#,16][1,2
 volumes = [(4./3) * np.pi * r**3 for r in radii]
 
 # _idx = int(sys.argv[2])
@@ -70,8 +71,9 @@ for R,V in zip(radii,volumes):
     _out *= dm_pmass * mlc.unitMass * (1./_fact)
     
     if zoom:
-        boxsize=3200
-        cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
+        #boxsize=3200
+        # cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
+        cop_tree = cKDTree(CoP, boxsize=boxsize)
     
         p2_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
                               "PartType2/Coordinates", numThreads=nthr, noH=True)  

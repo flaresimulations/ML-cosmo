@@ -6,10 +6,12 @@
 #SBATCH --error=logs/density_L0050.%a.%N.%j.e
 #SBATCH -t 0-12:00
 #SBATCH --cpus-per-task=1
-#SBATCH --array=4
+#SBATCH --array=8
 
 module load pythonconda3/4.5.4
 source activate eagle
 
 python calculate_local_density.py config/config_cosma_L0050N0752.ini $SLURM_ARRAY_TASK_ID
+# python calculate_local_density.py config/config_cosma_L0050N0752.ini $SLURM_ARRAY_TASK_ID
+# python calculate_local_density.py config/config_cosma_L0100N1504.ini $SLURM_ARRAY_TASK_ID
 

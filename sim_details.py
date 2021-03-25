@@ -18,6 +18,7 @@ class mlcosmo:
         self.sim_hydro = self.sim_directory + config['Simulation details']['sim_hydro']
         self.sim_dmo = self.sim_directory + config['Simulation details']['sim_dmo']
         self.tag = config['Simulation details']['tag']
+        self.boxsize = float(config['Simulation details']['boxsize'])
 
         ## match parameters
         self.fracToFind = float(config['Match parameters']['fracToFind'])

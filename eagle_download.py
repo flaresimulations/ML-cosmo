@@ -169,7 +169,7 @@ if density:
     data['Density_R2'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R2.txt')
     data['Density_R4'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R4.txt')
     data['Density_R8'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R8.txt')
-    data['Density_R16'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R16.txt')
+    # data['Density_R16'] = np.loadtxt('output/density_' + mlc.sim_name + '_' + mlc.tag + '_R16.txt')
 
 
 data.to_csv(output + mlc.sim_name + '_' + mlc.tag + "_match.csv")

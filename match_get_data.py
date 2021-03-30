@@ -15,6 +15,8 @@ from sim_details import mlcosmo
 mlc = mlcosmo(ini=_config)
 
 
+print("==========\nSim: %s\nTag: %s\n===========\n"%(_config,mlc.tag))
+
 output_folder = 'output/'
 nthr = 4
 

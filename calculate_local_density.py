@@ -60,7 +60,8 @@ for R,V in zip(radii,volumes):
     
     _out = np.zeros(len(CoP))
     step=1000
-    for i in range(0, len(CoP), step):
+    # for i in range(0, len(CoP), step):
+    for i in range(0, len(match_indexes), step):
         print(i)
         idxs = match_indexes[i:i+step]
         cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
@@ -73,7 +74,7 @@ for R,V in zip(radii,volumes):
     if zoom:
         #boxsize=3200
         # cop_tree = cKDTree(CoP[idxs], boxsize=boxsize)
-        cop_tree = cKDTree(CoP, boxsize=boxsize)
+        cop_tree = cKDTree(CoP[match_indexes], boxsize=boxsize)
     
         p2_pos = E.read_array("SNAPSHOT", mlc.sim_dmo, mlc.tag, 
                               "PartType2/Coordinates", numThreads=nthr, noH=True)  

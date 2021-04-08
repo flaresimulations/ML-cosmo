@@ -123,8 +123,8 @@ data['KineticEnergy_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subh
 # data['InitialMassWeightedBirthZ_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/InitialMassWeightedBirthZ", numThreads=nthr)[idx_EA]
 # data['InitialMassWeightedStellarAge_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/InitialMassWeightedStellarAge", numThreads=nthr)[idx_EA]
 
-MassType_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/MassType", numThreads=nthr, noH=True)[idx_EA] * mlc.unitMass
-data['MassType_Gas_EA'] = MassType_EA[:,0]
+# MassType_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/MassType", numThreads=nthr, noH=True)[idx_EA] * mlc.unitMass
+# data['MassType_Gas_EA'] = MassType_EA[:,0]
 # data['MassType_Stars_EA'] = MassType_EA[:,4]
 # data['MassType_BH_EA'] = MassType_EA[:,5]
 
@@ -135,7 +135,11 @@ data['MassTwiceHalfMassRad_BH_EA'] = MassTwiceHalfMassRad_EA[:,5]
 
 
 # data['StellarInitialMass_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/StellarInitialMass", numThreads=nthr)[idx_EA] * mlc.unitMass
-data['Stars_Mass_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[idx_EA] * mlc.unitMass
+# data['Stars_Mass_EA'] = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[idx_EA] * mlc.unitMass
+
+aperture_mass = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/ApertureMeasurements/Mass/030kpc", numThreads=nthr, noH=True)
+data['Stars_Mass_EA'] = aperture_mass[idx_EA,4] * mlc.unitMass
+data['MassType_Gas_EA'] = aperture_mass[idx_EA,0] * mlc.unitMass
 
 Stars_Spin_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Stars/Spin", numThreads=nthr, noH=True)[idx_EA]
 data['Stars_Spin_EA'] = pow(Stars_Spin_EA[:,0]**2 + Stars_Spin_EA[:,1]**2 + Stars_Spin_EA[:,2]**2,0.5)

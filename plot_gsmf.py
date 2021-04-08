@@ -16,7 +16,6 @@ from sim_details import mlcosmo
 nthr = 4
 # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 
-V = 100**3 # Mpc^3
 output = 'output/'
 
 
@@ -31,7 +30,8 @@ shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
                      "Subhalo/Mass", numThreads=nthr, noH=True) * mlc.unitMass
 mask = shm > 1e10
 mstar = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[mask] * mlc.unitMass
+                     "Subhalo/ApertureMeasurements/Mass/030kpc", 
+                     numThreads=nthr, noH=True)[mask,4] * mlc.unitMass 
 
 ## Load original EAGLE AGNdT9 prediction
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
@@ -39,7 +39,9 @@ shm = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
                      "Subhalo/Mass", numThreads=nthr, noH=True) * mlc.unitMass
 mask = shm > 1e10
 mstar_AGNdT9 = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, 
-                     "Subhalo/Stars/Mass", numThreads=nthr, noH=True)[mask] * mlc.unitMass
+                            "Subhalo/ApertureMeasurements/Mass/030kpc", 
+                            numThreads=nthr, noH=True)[mask,4] * mlc.unitMass 
+
 
 ## Load predictions
 
@@ -80,20 +82,21 @@ def calc_df(x, binLimits, volume):
 binLimits = np.linspace(4.9, 13.9, 31)
 bins = np.linspace(5.05, 13.75, 30)
 
-fig, ax = plt.subplots(1,1, figsize=(6,7))
+# fig, ax = plt.subplots(1,1, figsize=(6,7))
+fig, ax = plt.subplots(1,1, figsize=(6,5))
 
 lw = 3
 
-def plot_df(ax, mstar, binLimits, V, label, color, lw=3, ls='solid'):
-    phi, phi_sigma, N = calc_df(mstar, binLimits, V)
+def plot_df(ax, _mstar, binLimits, V, label, color, lw=3, ls='solid'):
+    phi, phi_sigma, N = calc_df(_mstar, binLimits, V)
     N_mask = np.where(N >= 10)[0]
     N_mask_hi = np.where(N < 10)[0]
-    print(N_mask)
-    print(N_mask_hi)
+    # print(N_mask)
+    # print(N_mask_hi)
     N_mask_hi = N_mask_hi[N_mask_hi > (N_mask.max()-1)]
     N_mask_hi = np.append(N_mask_hi.min()-1,N_mask_hi)
-    print(N_mask)
-    print(N_mask_hi)
+    # print(N_mask)
+    # print(N_mask_hi)
 
     ax.plot(bins[N_mask], np.log10(phi[N_mask]), label=label, lw=lw, c=color, ls=ls)
     ax.plot(bins[N_mask_hi], np.log10(phi[N_mask_hi]), #label='L100Ref', 
@@ -132,7 +135,8 @@ baldry_12['phi'][upp_limits] = baldry_12['phi'][upp_limits] + baldry_12['err'][u
 yerr[np.isinf(yerr)] = 0.6 # -1 * np.log10(baldry_12['phi'][np.isinf(yerr)[0]])
 
 ax.errorbar(baldry_12['logM'], np.log10(baldry_12['phi']),
-            yerr=yerr, uplims=upp_limits, color='grey', marker='o', linestyle='none')
+            yerr=yerr, uplims=upp_limits, color='grey', marker='o', 
+            linestyle='none', label='Baldry+12')
 
 
 ax.axvspan(7, 8, alpha=0.1, color='grey')

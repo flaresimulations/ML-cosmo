@@ -1,0 +1,19 @@
+Data description
+
+The clustering results of Farrow et al (2015). The main folder contains the 
+results for the four redshift slices, many of which are flux limited (at r<19.8, from
+the GAMA survey selection). The specially constructed volume limited samples are in
+the volume_limited folder. The filesnames with 'mag0.1' use filters shifted to 
+be at rest at z=0.1, the rest use z=0.0. The format of the filenames is
+
+farrow15--{LOWER}.-{PARAM}--{UPPER}-{LOWERZ}-z-{UPPERZ}-wprp.dat
+
+where PARAM is mag, mass or mag0.1, LOWER and UPPER signify the selection limits
+of PARAM and LOWERZ and UPPERZ give the redshift range. 
+
+
+Column Description
+
+# col1 r_p     Projected distance (Mpc/h)
+# col2 wp(r_p) Projected 2-point correlation function (Mpc/h)
+# col3 error   Error on projected 2-point correlation function (Mpc/h)

@@ -23,32 +23,34 @@ features_pretty = ['$M_{\mathrm{Crit,200}}$','$M_{\mathrm{subhalo}} \,/\, M_{\od
                    '$R_{v_{\mathrm{max}}}$','Satellite?']
 
 
-fig, (ax1,ax2) = plt.subplots(2,1,figsize=(5,8))
-plt.subplots_adjust(hspace=0.5)
+fig, ax2 = plt.subplots(1,1,figsize=(5,4))
+# fig, (ax1,ax2) = plt.subplots(2,1,figsize=(5,8))
+# plt.subplots_adjust(hspace=0.5)
 dx = 0.2
 
-for i,(output_name,name,c) in enumerate(zip(
-        ['L0050N0752','L0050N0752_zoom','L0100N1504'],
-        ['$\mathrm{L050AGN}$','$\mathrm{L050AGN+Zoom}$','$\mathrm{L100Ref}$'],
-        # 'L0100N1504_density'],'L0050N0752_density','L0050N0752_zoom_density'
-        ['C0','C1','C2','C3'])):
-
-    etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
-            pickle.load(open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
-
-    ## ---- Feature importance
-    importance_etree = etree.best_estimator_.feature_importances_
-    idx = importance_etree.argsort()[::-1]
-    sorted_features = np.asarray(features_pretty)[idx]
-    
-    pos = np.arange(len(idx))+ i*dx
-    ax1.bar(pos,importance_etree[idx], align='center', color=c, width=0.2, label=name)
-
-
-ax1.set_xticks(pos-0.2)
-ax1.set_xticklabels(sorted_features, rotation='vertical')
-ax1.set_ylabel('Importance')
-ax1.legend()
+# for i,(output_name,name,c) in enumerate(zip(
+#         ['L0050N0752','L0050N0752_zoom','L0100N1504'],
+#         ['$\mathrm{L050AGN}$','$\mathrm{L050AGN+Zoom}$','$\mathrm{L100Ref}$'],
+#         # 'L0100N1504_density'],'L0050N0752_density','L0050N0752_zoom_density'
+#         ['C0','C1','C2','C3'])):
+# 
+#     etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
+#             pickle.load(open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
+# 
+#     ## ---- Feature importance
+#     importance_etree = etree.best_estimator_.feature_importances_
+#     print(importance_etree)
+#     idx = importance_etree.argsort()[::-1]
+#     sorted_features = np.asarray(features_pretty)[idx]
+#     
+#     pos = np.arange(len(idx))+ i*dx
+#     ax1.bar(pos,importance_etree[idx], align='center', color=c, width=0.2, label=name)
+# 
+# 
+# ax1.set_xticks(pos-0.2)
+# ax1.set_xticklabels(sorted_features, rotation='vertical')
+# ax1.set_ylabel('Importance')
+# ax1.legend()
 
 
 [features.append(d) for d in ['Density_R1','Density_R2','Density_R4','Density_R8']]
@@ -63,6 +65,8 @@ for i,(output_name,name,c) in enumerate(zip(
         ['C0','C1'])):
     etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
         pickle.load(open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
+
+    print(output_name, etree.best_params_)
 
     ## ---- Feature importance
     importance_etree = etree.best_estimator_.feature_importances_

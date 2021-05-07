@@ -53,21 +53,21 @@ def vplot_data(feature,zero_val=1):
     return vdata
 
 
-fig,(ax1,ax2,ax3,ax4,ax5) = plt.subplots(1,5,figsize=(16,6))
-axes = [ax1,ax2,ax3,ax4,ax5]
+fig,((ax1,ax2),(ax3,ax4)) = plt.subplots(2,2,figsize=(8,10))
+axes = [ax1,ax2,ax3,ax4]
 
-preds = ['Stars_Mass_EA', 'MassType_Gas_EA', 'BlackHoleMass_EA',
-         'StellarVelDisp_EA', 'Stars_Metallicity_EA']#, 'StarFormationRate_EA']
+preds = ['Stars_Mass_EA', #'MassType_Gas_EA', 
+         'BlackHoleMass_EA', 'StellarVelDisp_EA', 'Stars_Metallicity_EA']#, 'StarFormationRate_EA']
 preds_pretty = ['$\mathrm{log_{10}}(M_{\star}\,/\,\mathrm{M_{\odot}})$',
-                '$\mathrm{log_{10}}(M_{\mathrm{gas}}\,/\,\mathrm{M_{\odot}})$',
+                # '$\mathrm{log_{10}}(M_{\mathrm{gas}}\,/\,\mathrm{M_{\odot}})$',
                 '$\mathrm{log_{10}}(M_{\\bullet}\,/\,\mathrm{M_{\odot}})$',
                 '$\mathrm{log_{10}}(v_{\star,\mathrm{disp}})$',
                 '$\mathrm{log_{10}}(Z_{*})$']#,
 #                '$\mathrm{log_{10}}(SFR \,/\, \mathrm{M_{\odot}\, yr^{-1}})$']
-ax_lims = [[4.8,12],[5.9,12],[5.15,6],[0.5,2.2],[-5.25,-1]]#,[-3.5,0.8]]
-zero_vals = np.array([6, 4, 4, 1, -4, -4.9])
-bandwidths = ['scott','scott',0.1,'scott','scott']
-kgrid = [None,None,200,200,None]
+ax_lims = [[4.8,12],[5.15,6],[0.5,2.2],[-5.25,-1]]#,[-3.5,0.8]] [5.9,12],
+zero_vals = np.array([6, 4, 1, -4, -4.9])
+bandwidths = ['scott',0.1,'scott','scott']
+kgrid = [None,200,200,None]
 
 for ax,pred,pretty,_lims,zero_val,_bw,_k in zip(axes,preds,preds_pretty,ax_lims,
                                                 zero_vals,bandwidths,kgrid):
@@ -92,7 +92,7 @@ for ax,pred,pretty,_lims,zero_val,_bw,_k in zip(axes,preds,preds_pretty,ax_lims,
     ax.xaxis.set_visible(False)
 
 
-ax1.legend(loc=4, fontsize=13, frameon=False)
+ax3.legend(fontsize=13, frameon=False, bbox_to_anchor=(0.6,-0.05))
 
 # plt.show()
 fname = 'plots/violins_%s.png'%mlc.sim_name; print(fname)

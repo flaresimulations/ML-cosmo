@@ -50,6 +50,12 @@ data['KE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag,
 
 data['TE_DM'] = E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
                              "Subhalo/TotalEnergy", numThreads=nthr, noH=True)
+SubPos =  E.read_array("SUBFIND", mlc.sim_dmo, mlc.tag, 
+                       "Subhalo/CentreOfPotential", numThreads=nthr, noH=True)
+data['SubPos_x'] = SubPos[:,0]
+data['SubPos_y'] = SubPos[:,1]
+data['SubPos_z'] = SubPos[:,2]
+
 
 data['PotentialEnergy_DM'] = data['TE_DM'] - data['KE_DM']
 

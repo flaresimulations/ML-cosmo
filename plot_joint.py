@@ -7,15 +7,14 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 
-import seaborn as sns
 
 from sim_details import mlcosmo
 # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
 mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
 
 model_dir = 'models/'
-zoom = True
-density = False
+zoom = True #False
+density = True #False
 output_name = mlc.sim_name
 if zoom: output_name += '_zoom'
 if density: output_name += '_density'
@@ -30,7 +29,7 @@ galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(\
                            etree.predict(feature_scaler.transform(\
                            eagle[~train][features]))),columns=predictors)
 
-mask = np.array(galaxy_pred['Stars_Mass_EA'] > 1e8)
+# mask = np.array(galaxy_pred['Stars_Mass_EA'] > 1e8)
 
 preds = ['Stars_Mass_EA', 'MassType_Gas_EA', 'BlackHoleMass_EA',
          'StellarVelDisp_EA', 'StarFormationRate_EA', 'Stars_Metallicity_EA']
@@ -41,7 +40,7 @@ preds_pretty = ['$\mathrm{log_{10}}(M_{\star}\,/\,\mathrm{M_{\odot}})$',
                 '$\mathrm{log_{10}}(SFR \,/\, \mathrm{M_{\odot}\, yr^{-1}})$',
                 '$\mathrm{log_{10}}(Z_{*})$']
 
-ax_lims = [[5.6,13],[5.4,14],[4.8,10],[1,3],[-3.7,2],[-4,-1]]
+ax_lims = [[4.5,13],[5.4,11],[4,10],[0.3,3],[-4.6,2.5],[-6.8,-1]]
 
 fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(2, 3, figsize=(16,9))
 axes = [ax1,ax2,ax3,ax4,ax5,ax6]
@@ -50,6 +49,7 @@ plt.subplots_adjust(wspace=0.55)
 
 for ax,pred,pretty,_lims in zip(axes, preds, preds_pretty, ax_lims):
 
+    print(pred, pretty, _lims)
     im = ax.hexbin(np.ma.array(eagle[~train][pred]),
                    np.ma.array(galaxy_pred[pred]),
                    bins='log', gridsize=20, cmap='Blues',mincnt=0,
@@ -75,3 +75,5 @@ for ax,pred,pretty,_lims in zip(axes, preds, preds_pretty, ax_lims):
 # plt.show()
 fname = 'plots/joint_plots_%s.png'%mlc.sim_name; print(fname)
 plt.savefig(fname, dpi=300, bbox_inches='tight')
+
+

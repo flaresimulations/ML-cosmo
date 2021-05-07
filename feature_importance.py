@@ -14,7 +14,6 @@ from sklearn.metrics import r2_score, explained_variance_score, mean_squared_log
 from scipy.stats import pearsonr
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 
 from sim_details import mlcosmo
 mlc = mlcosmo(ini=sys.argv[1])
@@ -93,7 +92,7 @@ predictors = [
               # 'MassTwiceHalfMassRad_BH_EA',
               #'StellarInitialMass_EA',
               'Stars_Mass_EA',
-              'Stars_Spin_EA',
+              #'Stars_Spin_EA',
               'Stars_Metallicity_EA',
               'StellarVelDisp_EA',
               # 'StellarVelDisp_HalfMassProjRad_EA',
@@ -120,96 +119,67 @@ eagle['Stars_Metallicity_EA'] = np.log10(eagle['Stars_Metallicity_EA'])
 eagle['StellarVelDisp_EA'] = np.log10(eagle['StellarVelDisp_EA'])
 eagle['StarFormationRate_EA'] = np.log10(eagle['StarFormationRate_EA'])
 
-# for i in [1,2,4,8]:
-#     eagle['Density_R%i'%i] = np.log10(eagle['Density_R%i'%i])
-
-# eagle['FOF_Group_M_Crit200_DM'] = np.log10(eagle['FOF_Group_M_Crit200_DM'])
-# eagle['M_DM'] = np.log10(eagle['M_DM'])
-# eagle['halfMassRad_DM'] = np.log10(eagle['halfMassRad_DM'])
-# # eagle['velocity_DM'] = np.log10(eagle['velocity_DM'])
-# # eagle['Vmax_DM'] = np.log10(eagle['Vmax_DM'])
-# eagle['PotentialEnergy_DM'] = np.log10(eagle['PotentialEnergy_DM'])
-# # eagle['VmaxRadius_DM'] = np.log10(eagle['VmaxRadius_DM'])
-
-## Extra features
-# eagle['halo_mass_ratio'] = np.log10(eagle['M_DM'] / eagle['FOF_Group_M_Crit200_DM'])
-# 
-# features.append('halo_mass_ratio')
-# features_pretty.append('Halo mass ratio')
 
 split = 0.8
 train = np.random.rand(len(eagle)) < split
 print("train / test:", np.sum(train), np.sum(~train))
+eagle['train_mask'] = train
 
 feature_scaler = preprocessing.StandardScaler().fit(eagle[train][features])
 predictor_scaler = preprocessing.StandardScaler().fit(eagle[train][predictors])
-# feature_scaler = preprocessing.RobustScaler().fit(eagle[train][features])
-# predictor_scaler = preprocessing.RobustScaler().fit(eagle[train][predictors])
 
-## ---- Cross Validation
 
 ss = KFold(n_splits=5, shuffle=True)
 tuned_parameters = {
-                    'n_estimators': [25,35,45,55],
-                    'min_samples_split': [5,15,25,35], 
-                    'min_samples_leaf': [2,4,6,8], 
+                    'n_estimators': [25],#,35,45,55],
+                    'min_samples_split': [15],#[5,15,25,35], 
+                    'min_samples_leaf': [8], # [2,4,6,8], 
                     }
 
 etree = GridSearchCV(ExtraTreesRegressor(), param_grid=tuned_parameters, cv=None, n_jobs=4)
 
-etree.fit(feature_scaler.transform(eagle[train][features]), predictor_scaler.transform(eagle[train][predictors]))
 
-print(etree.best_params_)
+_out = {predictor: {feature: None for feature in features} for predictor in predictors}
 
-# regr = MLPRegressor(random_state=1, max_iter=700, verbose=True, tol=1e-5)
-# regr.fit(feature_scaler.transform(eagle[train][features]), predictor_scaler.transform(eagle[train][predictors]))
-
-eagle['train_mask'] = train
-
-
-
-# pickle.dump([regr, features, predictors, feature_scaler, predictor_scaler, eagle], 
-pickle.dump([etree, features, predictors, feature_scaler, predictor_scaler, eagle], 
-            open(model_dir + output_name + '_' + mlc.tag + '_ert.model', 'wb'))
+for i,predictor in enumerate(predictors):
+    print(predictor)
+    etree.fit(feature_scaler.transform(eagle[train][features]), 
+            predictor_scaler.transform(eagle[train][predictors])[:,i])
+    
+    importance_etree = etree.best_estimator_.feature_importances_
+    
+    for j,feature in enumerate(features):
+        _out[predictor][feature] = importance_etree[j]
 
 
-## ---- Prediction
-galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(etree.predict(feature_scaler.transform(eagle[~train][features]))),columns=predictors)
-# galaxy_pred = pd.DataFrame(predictor_scaler.inverse_transform(regr.predict(feature_scaler.transform(eagle[~train][features]))),columns=predictors)
 
-# galaxy_pred.to_csv('%sprediction_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
-# eagle[predictors].to_csv('%sfeatures_%s_%s.csv'%(output,mlc.sim_name,mlc.tag))
+predictors_pretty = ['$M_{\cdot} \,/\, M_{\odot}$',
+                     '$M_{\mathrm{gas}} \,/\, M_{\odot}$',
+                     '$M_{\star} \,/\, M_{\odot}$',
+                     '$Z_{\star}$',
+                     '$v_{\mathrm{disp,\star}}$',
+                     '$\mathrm{SFR} \,/\, M_{\odot} \, \mathrm{yr^{-1}}$',
+                    ]
 
-## ---- Errors
-# r2_ert = r2_score(eagle[~train][predictors], galaxy_pred, multioutput='raw_values')
+H = np.array([[_out[predictor][feature] for feature in features] for predictor in predictors])
+_H = H.T / H.max(axis=1)
 
-pearson = []
-for p in predictors:
-    pearson.append(round(pearsonr(eagle[~train][p],galaxy_pred[p])[0],3))
-
-
-err = pd.DataFrame({'Predictors': galaxy_pred.columns, 'Pearson': pearson})
-
-scores = {}
-for _scorer in [r2_score, explained_variance_score, mean_squared_error]:
-    err[_scorer.__name__] = _scorer(eagle[~train][predictors], 
-                                       galaxy_pred, multioutput='raw_values')
-
-
-print(err.sort_values(by='r2_score',ascending=False))
-
-# ## ---- Feature importance
-importance_etree = etree.best_estimator_.feature_importances_
-idx = importance_etree.argsort()[::-1]
-sorted_features = np.asarray(features_pretty)[idx]
+fig, ax = plt.subplots(1,1,figsize=(5, 6))
+plt.imshow(_H)
 
 pos = np.arange(len(idx))
-plt.bar(pos,importance_etree[idx], align='center')
-plt.xticks(pos, sorted_features, rotation='vertical')
-plt.ylabel('Importance')
-# plt.xlabel('Feature')
-plt.show()
-# # # fname = 'plots/feature_importance_%s.png'%mlc.sim_name
-# # # plt.savefig(fname, dpi=150, bbox_inches='tight')
+plt.yticks(np.arange(len(features)), features_pretty)#, rotation='vertical')
+plt.xticks(np.arange(len(predictors)), predictors_pretty, rotation='vertical')
 
+cax = fig.add_axes([0.14, 0.12, 0.88, 0.75])
+cax.get_xaxis().set_visible(False)
+cax.get_yaxis().set_visible(False)
+cax.patch.set_alpha(0)
+cax.set_frame_on(False)
+cbar = plt.colorbar(orientation='vertical')
+cbar.set_label('Relative feature importance', rotation=270, labelpad=12)
+
+plt.show()
+# fname = 'plots/feature_importance_predictors_%s.png'%mlc.sim_name
+# plt.savefig(fname, dpi=250, bbox_inches='tight')
 

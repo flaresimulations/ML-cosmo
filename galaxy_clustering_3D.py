@@ -6,7 +6,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 from halotools.mock_observables import return_xyz_formatted_array
-from halotools.mock_observables import wp# , tpcf
+from halotools.mock_observables import tpcf
 
 import eagle_IO.eagle_IO as E
 
@@ -58,74 +58,74 @@ rp_binlims = np.logspace(-1.5,2.1,19)
 rp_bins = np.logspace(-1.4,2.0,18)
 
 
-# coods_ref = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-#                      "Subhalo/CentreOfPotential",
-#                      numThreads=nthr, noH=False, physicalUnits=False)
-# 
-# mstar_ref = np.log10(E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
-#                      "Subhalo/ApertureMeasurements/Mass/030kpc",
-#                      numThreads=nthr, noH=True)[:,4] * mlc.unitMass * h**2)
-# 
-# wp_all = {}
-# wp_tiles = {}
-# 
-# for mstar,coods,Lbox,label,rp_max in zip(
-#           [mstar_ref,galaxy_pred_L0050_zoom['Stars_Mass_EA'],galaxy_pred_L100['Stars_Mass_EA']],
-#           [coods_ref, coods_pmill, coods_l100],
-#           [100*h, 800*h, 100*h], #100],
-#           ['Ref-100','Pmill','L100'],
-#           [10**1.1, 10**2, 10**1.1]): #10**1.5]):
-#         
-#     wp_all[label] = {}
-#     wp_tiles[label] = {}
-# 
-#     for lim in [9.5, 10, 10.5, 11]:
-#         pi_max = 20.; #Lbox = 100 * h #* scale_factor
-# 
-#         _rp_binlims = rp_binlims[rp_binlims < rp_max]
-#         _rp_bins = rp_bins[:len(_rp_binlims)-1]
-#     
-#         mask = (mstar > lim) & (mstar < lim+0.5)   
-#         print("N_gals:", np.sum(mask))
-#         all_positions = return_xyz_formatted_array(coods[mask,0], coods[mask,1], coods[mask,2])
-# 
-#         wp_all[label][lim] = wp(all_positions, _rp_binlims, pi_max, period=Lbox, 
-#                                 num_threads='max').tolist()
-#     
-#         wp_tiles[label][lim] = np.zeros((8,len(_rp_bins)))
-# 
-#         ## calculate jack knife errors
-#         for i,(x_lo,x_hi,y_lo,y_hi,z_lo,z_hi) in \
-#                 enumerate(zip([0, 0, Lbox/2, Lbox/2, 0, 0, Lbox/2, Lbox/2],
-#                     [Lbox/2, Lbox/2, Lbox, Lbox, Lbox/2, Lbox/2, Lbox, Lbox],
-#                     [0, Lbox/2, Lbox/2, 0, 0, Lbox/2, Lbox/2, 0],
-#                     [Lbox/2, Lbox, Lbox, Lbox/2, Lbox/2, Lbox, Lbox, Lbox/2],
-#                     [0, 0, 0, 0, Lbox/2, Lbox/2, Lbox/2, Lbox/2],
-#                     [Lbox/2, Lbox/2, Lbox/2, Lbox/2, Lbox, Lbox, Lbox, Lbox])):
-#             
-#             mask = (mstar > lim) & (mstar < lim+0.5)
-#             mask = mask & np.invert((coods[:,0] > x_lo) & (coods[:,0] < x_hi) &\
-#                                     (coods[:,1] > y_lo) & (coods[:,1] < y_hi) &\
-#                                     (coods[:,2] > z_lo) & (coods[:,2] < z_hi))
-#     
-#             all_positions = return_xyz_formatted_array(coods[mask,0], coods[mask,1], coods[mask,2])
-#     
-#             wp_tiles[label][lim][i] = wp(all_positions, _rp_binlims, pi_max, 
-#                                          period=Lbox, num_threads='max')
-# 
-#         wp_tiles[label][lim] = wp_tiles[label][lim].tolist()
-#    
-# 
-# with open('output/clustering_wp_all.json', 'w') as outfile:
-#     json.dump(wp_all, outfile)
-# 
-# with open('output/clustering_wp_tiles.json', 'w') as outfile:
-#     json.dump(wp_tiles, outfile)
+coods_ref = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                     "Subhalo/CentreOfPotential",
+                     numThreads=nthr, noH=False, physicalUnits=False)
 
-with open('output/clustering_wp_all.json', 'r') as outfile:
+mstar_ref = np.log10(E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag,
+                     "Subhalo/ApertureMeasurements/Mass/030kpc",
+                     numThreads=nthr, noH=True)[:,4] * mlc.unitMass * h**2)
+
+wp_all = {}
+wp_tiles = {}
+
+for mstar,coods,Lbox,label,rp_max in zip(
+          [mstar_ref,galaxy_pred_L0050_zoom['Stars_Mass_EA'],galaxy_pred_L100['Stars_Mass_EA']],
+          [coods_ref, coods_pmill, coods_l100],
+          [100*h, 800*h, 100*h], #100],
+          ['Ref-100','Pmill','L100'],
+          [10**1.1, 10**2, 10**1.1]): #10**1.5]):
+        
+    wp_all[label] = {}
+    wp_tiles[label] = {}
+
+    for lim in [9.5, 10, 10.5, 11]:
+        pi_max = 20.; #Lbox = 100 * h #* scale_factor
+
+        _rp_binlims = rp_binlims[rp_binlims < rp_max]
+        _rp_bins = rp_bins[:len(_rp_binlims)-1]
+    
+        mask = (mstar > lim) & (mstar < lim+0.5)   
+        print("N_gals:", np.sum(mask))
+        all_positions = return_xyz_formatted_array(coods[mask,0], coods[mask,1], coods[mask,2])
+
+        wp_all[label][lim] = tpcf(all_positions, _rp_binlims, period=Lbox, 
+                                num_threads='max').tolist() # pi_max
+    
+        wp_tiles[label][lim] = np.zeros((8,len(_rp_bins)))
+
+        ## calculate jack knife errors
+        for i,(x_lo,x_hi,y_lo,y_hi,z_lo,z_hi) in \
+                enumerate(zip([0, 0, Lbox/2, Lbox/2, 0, 0, Lbox/2, Lbox/2],
+                    [Lbox/2, Lbox/2, Lbox, Lbox, Lbox/2, Lbox/2, Lbox, Lbox],
+                    [0, Lbox/2, Lbox/2, 0, 0, Lbox/2, Lbox/2, 0],
+                    [Lbox/2, Lbox, Lbox, Lbox/2, Lbox/2, Lbox, Lbox, Lbox/2],
+                    [0, 0, 0, 0, Lbox/2, Lbox/2, Lbox/2, Lbox/2],
+                    [Lbox/2, Lbox/2, Lbox/2, Lbox/2, Lbox, Lbox, Lbox, Lbox])):
+            
+            mask = (mstar > lim) & (mstar < lim+0.5)
+            mask = mask & np.invert((coods[:,0] > x_lo) & (coods[:,0] < x_hi) &\
+                                    (coods[:,1] > y_lo) & (coods[:,1] < y_hi) &\
+                                    (coods[:,2] > z_lo) & (coods[:,2] < z_hi))
+    
+            all_positions = return_xyz_formatted_array(coods[mask,0], coods[mask,1], coods[mask,2])
+    
+            wp_tiles[label][lim][i] = tpcf(all_positions, _rp_binlims,
+                                         period=Lbox, num_threads='max') #pi_max, 
+
+        wp_tiles[label][lim] = wp_tiles[label][lim].tolist()
+   
+
+with open('output/clustering_3D_wp_all.json', 'w') as outfile:
+    json.dump(wp_all, outfile)
+
+with open('output/clustering_3D_wp_tiles.json', 'w') as outfile:
+    json.dump(wp_tiles, outfile)
+
+with open('output/clustering_3D_wp_all.json', 'r') as outfile:
     wp_all = json.load(outfile)
 
-with open('output/clustering_wp_tiles.json', 'r') as outfile:
+with open('output/clustering_3D_wp_tiles.json', 'r') as outfile:
     wp_tiles = json.load(outfile)
 
     
@@ -162,23 +162,16 @@ for ax,lim,fname in zip([ax1,ax2,ax3,ax4], [9.5, 10, 10.5, 11], fnames):
         ax.errorbar(np.log10(_rp_bins), np.log10(wp_all[label][lim] / _rp_bins),
                     yerr=err, label=pretty_label, capsize=2, uplims=uplims, c=c)
 
-    ## obs data    
-    _dat = np.loadtxt(fname)
-    ax.fill_between(np.log10(_dat[:,0]), np.log10((_dat[:,1]-_dat[:,2])/_dat[:,0]), 
-                                         np.log10((_dat[:,1]+_dat[:,2])/_dat[:,0]), 
-                                         alpha=0.5, color='grey')
-
-    ax.plot(np.log10(_dat[:,0]), np.log10(_dat[:,1]/_dat[:,0]), label='GAMA', color='black')
-   
     ax.text(0.93, 0.92, '$%.1f < \mathrm{log_{10}}(M_{\star} / M_{\odot} h^{-2}) < %.1f$'%(lim,lim+0.5), 
             transform=ax.transAxes, size=13, horizontalalignment='right')
-    ax.set_xlim(-1.7,2); ax.set_ylim(-3.5,5)
+    ax.set_xlim(-1.7,2)
+    ax.set_ylim(-5,6)
     ax.grid(alpha=0.4)
 
 for ax in [ax2,ax4]: ax.set_yticklabels([])
 for ax in [ax1,ax2]: ax.set_xticklabels([])
-for ax in [ax1,ax3]: ax.set_ylabel('$\mathrm{log_{10}}(w_{p}(r_{p})\,/\,r_{p})$', size=13)
-for ax in [ax3,ax4]: ax.set_xlabel('$\mathrm{log_{10}}(r_{p} \,/\, h^{-1} \mathrm{Mpc})$', size=13)
+for ax in [ax1,ax3]: ax.set_ylabel('$\mathrm{log_{10}}(\\xi_{r})$', size=13)
+for ax in [ax3,ax4]: ax.set_xlabel('$\mathrm{log_{10}}(r \,/\, h^{-1} \mathrm{Mpc})$', size=13)
 ax1.legend(loc='lower left')
 plt.show()
-# plt.savefig('plots/clustering.png', dpi=200, bbox_inches='tight')
+# plt.savefig('plots/3D_clustering.png', dpi=200, bbox_inches='tight')

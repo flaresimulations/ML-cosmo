@@ -1,0 +1,17 @@
+#! /bin/bash
+#SBATCH -A dp004
+#SBATCH -p cosma7
+#SBATCH --job-name=train_L0100N1504
+#SBATCH --output=logs/train.%a.%N.%j.o
+#SBATCH --error=logs/train.%a.%N.%j.e
+#SBATCH -t 0-10:00
+
+# #SBATCH --cpus-per-task=1
+# #SBATCH --array=0-15
+
+module load pythonconda3/4.5.4
+source activate eagle
+
+python train.py config/config_cosma_L0100N1504.ini 1 1
+
+

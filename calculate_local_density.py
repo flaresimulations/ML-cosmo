@@ -12,9 +12,11 @@ _config = str(sys.argv[1])
 mlc = mlcosmo(ini=_config)
 
 
-zoom=bool(sys.argv[2])
+zoom=bool(int(sys.argv[2]))
 boxsize=mlc.boxsize # float(sys.argv[2])
 nthr=8
+
+print("==========\nZoom:", zoom, "\n======")
 
 radii = [1,2,4,8]#,16][1,2
 volumes = [(4./3) * np.pi * r**3 for r in radii]

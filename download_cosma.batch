@@ -1,0 +1,16 @@
+#! /bin/bash
+#SBATCH -A dp004
+#SBATCH -p cosma7
+#SBATCH --job-name=eagle_download
+#SBATCH --output=logs/eagle_download.%a.%N.%j.o
+#SBATCH --error=logs/eagle_download.%a.%N.%j.e
+#SBATCH -t 16:00:00
+#SBATCH --ntasks 28
+#SBATCH --exclusive
+
+module load pythonconda3/4.5.4
+source activate eagle
+
+# python eagle_download.py config/config_cosma_L0050N0752.ini
+python eagle_download.py config/config_cosma_L0100N1504.ini
+

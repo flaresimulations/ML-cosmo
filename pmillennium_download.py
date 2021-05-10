@@ -14,8 +14,9 @@ unitLength = 1e3
 Mpc = 3.08567758e22
 _h = 0.6777
 
-
-fname = "/cosma5/data/jch/L800/Runs/KEEP/data/groups_271/subhalo_tab_271.*" 
+snap = '249' # z = 0.1099
+redshift = 'z000p101'
+fname = f"/cosma5/data/jch/L800/Runs/KEEP/data/groups_{snap}/subhalo_tab_{snap}.*" 
 files = glob.glob(fname)
 
 subtab = subfind.SubTabFile(files[0], id_bytes=4) 
@@ -85,10 +86,12 @@ data['VmaxRadius_DM'] = SubRVmax / _h
 data['PotentialEnergy_DM'] = SubPotentialEnergy * (1./unitLength) 
 # data['BindingEnergy_DM'] = SubBindingEnergy
 data['Satellite'] = Satellite
-
+data['SubPos_x'] = SubPos[:,0] / _h
+data['SubPos_y'] = SubPos[:,1] / _h
+data['SubPos_z'] = SubPos[:,2] / _h
 
 output = 'output/'
-data.to_csv(output + 'PMillennium' + '_' + 'z000p000' + "_dmo.csv")
+data.to_csv(output + 'PMillennium_' + redshift + "_dmo.csv")
 
 # filename = output + 'PMillennium' + '_' + 'z000p000' + "_dmo.csv"
 mask = (SubPos[:,0] < 100) & (SubPos[:,1] < 100) & (SubPos[:,2] < 100)
@@ -98,5 +101,5 @@ df = data[mask]
 # skip = np.where(np.random.rand(n) > 0.05)[0]
 # df = pd.read_csv(filename, skiprows=skip)
 
-df.to_csv(output + 'PMillennium' + '_' + 'z000p000' + "_dmo_subset.csv")
+df.to_csv(output + 'PMillennium_' + redshift + "_dmo_subset.csv")
 

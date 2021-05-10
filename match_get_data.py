@@ -18,7 +18,7 @@ mlc = mlcosmo(ini=_config)
 print("==========\nSim: %s\nTag: %s\n===========\n"%(_config,mlc.tag))
 
 output_folder = 'output/'
-nthr = 4
+nthr = 8
 
 
 M_EA = E.read_array("SUBFIND", mlc.sim_hydro, mlc.tag, "Subhalo/Mass", numThreads=nthr) * mlc.unitMass

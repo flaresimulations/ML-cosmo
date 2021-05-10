@@ -21,5 +21,5 @@ match.reset_index(inplace=True)
 match.to_csv('%s/matchedHalosSub_%s_%s.dat'%(output,mlc.sim_name,mlc.tag))
 
 
-for i,f in enumerate(files): os.remove(f)
+# for i,f in enumerate(files): os.remove(f)
 

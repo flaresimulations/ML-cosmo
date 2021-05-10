@@ -37,7 +37,7 @@ from operator import le, ge
 def vplot_data(feature,lim=-5,op=ge):   
     vdata_temp = pd.DataFrame(np.ma.array(eagle[~train][feature]),  columns=[feature])
 
-    mask = op(vdata_temp['StarFormationRate_EA'], lim)
+    mask = op(vdata_temp['MassType_Gas_EA'], lim)
 
     vdata_temp = vdata_temp.loc[mask].reset_index(drop=True)
     vdata_temp['type'] = 'eagle'
@@ -62,19 +62,19 @@ ax2 = fig.add_subplot(spec[1])
 ax3 = fig.add_subplot(spec[2])
 axes = [ax1,ax2,ax3]
 
-ax_lims = [-3.5,0.8]
-sfr_lims = [-5,-3.1,-3.1] 
+ax_lims = [5.5, 10.6] # [-3.5,0.8]
+lims = [0,6,6] 
 operators = [ge,ge,le]
 
-for i,(ax,sfrlim,_op) in enumerate(zip(axes, sfr_lims, operators)):
+for i,(ax,_lim,_op) in enumerate(zip(axes, lims, operators)):
 
-    vdata = vplot_data('StarFormationRate_EA', sfrlim, op=_op)
+    vdata = vplot_data('MassType_Gas_EA', _lim, op=_op)
     if i==2:
-        sns.violinplot(x='dummy', y='StarFormationRate_EA', hue='type', split=False, 
+        sns.violinplot(x='dummy', y='MassType_Gas_EA', hue='type', split=False, 
                        data=vdata.loc[vdata['type'] == 'prediction'], 
                    palette="Set2", inner='quartile', ax=ax, cut=0)
     else:
-        sns.violinplot(x='dummy', y='StarFormationRate_EA', hue='type', split=True, data=vdata, 
+        sns.violinplot(x='dummy', y='MassType_Gas_EA', hue='type', split=True, data=vdata, 
                        palette="Set2", inner='quartile', ax=ax, cut=0)
 
     ax.legend_.remove()
@@ -88,14 +88,15 @@ for i,(ax,sfrlim,_op) in enumerate(zip(axes, sfr_lims, operators)):
     ax.yaxis.set_ticks_position('left')
     ax.xaxis.set_visible(False)
 
-ax1.set_ylabel('$\mathrm{log_{10}}(SFR \,/\, \mathrm{M_{\odot}\, yr^{-1}})$', fontsize=14)
+
+ax1.set_ylabel('$M_{\mathrm{gas}} \,/\, \mathrm{M_{\odot}}$', fontsize=14)
 ax1.legend(loc=(0.1,-0.18), fontsize=13, frameon=False)
-ax2.text(0.24, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}} > 10^{-3}$', 
+ax2.text(0.24, -0.1, '$\\frac{M_{\mathrm{gas,EAGLE}}}{\mathrm{M_{\odot}}} > 10^{6}$', 
          size=14, transform=ax2.transAxes)
-ax3.text(0.1, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}} < 10^{-3}$', 
+ax3.text(0.1, -0.1, '$\\frac{M_{\mathrm{gas,EAGLE}}}{\mathrm{M_{\odot}}} < 10^{6}$', 
          size=14, transform=ax3.transAxes)
 
-plt.show()
-# fname = 'plots/violins_SFR_%s.png'%mlc.sim_name; print(fname)
-# plt.savefig(fname, dpi=150, bbox_inches='tight')
+# plt.show()
+fname = 'plots/violins_gas_%s.png'%mlc.sim_name; print(fname)
+plt.savefig(fname, dpi=150, bbox_inches='tight')
 

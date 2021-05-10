@@ -111,8 +111,10 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
                 continue
 
             else:
-                print("Match not confirmed.")
+                print("Match not confirmed. Reversed count:", reversed_count)
             break
+        else:
+            print("No match found")
 
 
 _df = pd.DataFrame(output)

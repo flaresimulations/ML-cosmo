@@ -40,6 +40,19 @@ preds_pretty = ['$\mathrm{log_{10}}(M_{\star}\,/\,\mathrm{M_{\odot}})$',
                 '$\mathrm{log_{10}}(SFR \,/\, \mathrm{M_{\odot}\, yr^{-1}})$',
                 '$\mathrm{log_{10}}(Z_{*})$']
 
+## fractions of galaxies within x dex
+diff = {pred: None for pred in preds}
+for pred in preds:
+    diff[pred] = np.array(eagle[~train][pred]) - \
+                 np.array(galaxy_pred[pred])
+
+    print(pred, "%0.3f"%(np.sum(diff[pred] < 0.2) / len(diff[pred])))
+    
+    mask = eagle[~train]['Stars_Mass_EA'] > 9
+    print(pred, "%0.3f"%(np.sum(diff[pred][mask] < 0.2) / len(diff[pred][mask])))
+
+
+
 ax_lims = [[4.5,13],[5.4,11],[4,10],[0.3,3],[-4.6,2.5],[-6.8,-1]]
 
 fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(2, 3, figsize=(16,9))
@@ -70,10 +83,13 @@ for ax,pred,pretty,_lims in zip(axes, preds, preds_pretty, ax_lims):
     ax.set_ylim(_lims[0], _lims[1])
     ax.set_xlabel('%s $\, \mathrm{_{EAGLE}}$'%pretty, size=14)
     ax.set_ylabel('%s $\, \mathrm{_{Predicted}}$'%pretty, size=14)
+    ax.text(0.05, 0.88, "Percentage of predictions\nwithin 0.2 dex: %0.0f%s"%\
+            (100* np.sum(diff[pred] < 0.2) / len(diff[pred]), chr(37)), 
+            transform=ax.transAxes)
 
 
 # plt.show()
-fname = 'plots/joint_plots_%s.png'%mlc.sim_name; print(fname)
-plt.savefig(fname, dpi=300, bbox_inches='tight')
+fname = 'plots/joint_plots_%s.pdf'%mlc.sim_name; print(fname)
+plt.savefig(fname, dpi=300, bbox_inches='tight'); plt.close()
 
 

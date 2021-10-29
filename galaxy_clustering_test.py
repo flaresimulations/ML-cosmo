@@ -47,23 +47,17 @@ galaxy_pred_L0050_zoom = pd.DataFrame(predictor_scaler.inverse_transform(\
                            etree.predict(feature_scaler.transform(\
                            dmo[features]))),columns=predictors)
 
-mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-dmo = pd.read_csv('output/%s_%s_dmo.csv'%(mlc.sim_name, mlc.tag))
-dmo = dmo.loc[(dmo['M_DM'] > 1e10) & (dmo['FOF_Group_M_Crit200_DM'] > 5e9)].reset_index(drop=True)
-coods_l100 = np.array(dmo[['SubPos_x','SubPos_y','SubPos_z']]) * h
 
-galaxy_pred_L100 = pd.DataFrame(predictor_scaler.inverse_transform(\
-                           etree.predict(feature_scaler.transform(\
-                           dmo[features]))),columns=predictors)
+from sklearn.isotonic import IsotonicRegression
+ir = IsotonicRegression(out_of_bounds="clip")
 
-## Prediction on L100 _hydro_ features
-dmo = pd.read_csv('output/%s_%s_hydro.csv'%(mlc.sim_name, mlc.tag))
-dmo = dmo.loc[(dmo['M_DM'] > 1e10) & (dmo['FOF_Group_M_Crit200_DM'] > 5e9)].reset_index(drop=True)
-coods_l100_hydro = np.array(dmo[['SubPos_x','SubPos_y','SubPos_z']]) * h
-
-galaxy_pred_L100_hydro = pd.DataFrame(predictor_scaler.inverse_transform(\
-                           etree.predict(feature_scaler.transform(\
-                           dmo[features]))),columns=predictors)
+feat = 'M_DM' # 'Vmax_DM'
+pred = 'Stars_Mass_EA'
+_new_x = np.log10(dmo[feat])
+# p = np.polyfit(np.log10(eagle[feat]), eagle[pred], deg=1)
+# sham_pred = p[0]*_new_x + p[1]
+ir.fit(np.log10(eagle[feat]), eagle[pred])
+sham_pred = ir.predict(_new_x)
 
 
 rp_binlims = np.logspace(-1.5,2.1,19)
@@ -89,9 +83,13 @@ rp_bins = np.logspace(-1.4,2.0,18)
 #           ['Ref-100','Pmill','L100'],
 #           [10**1.1, 10**2, 10**1.1]): #10**1.5]):
 
-for mstar,coods,Lbox,label,rp_max in zip([galaxy_pred_L100_hydro['Stars_Mass_EA']],
-                                         [coods_l100_hydro],[100*h],
-                                         ['L100_hydro'],[10**1.1]):
+# for mstar,coods,Lbox,label,rp_max in zip([galaxy_pred_L100_hydro['Stars_Mass_EA']],
+#                                          [coods_l100_hydro],[100*h],
+#                                          ['L100_hydro'],[10**1.1]):
+
+for mstar,coods,Lbox,label,rp_max in zip([sham_pred],
+                                         [coods_pmill],[800*h],
+                                         ['SHAM'],[10**2]):
     
     print(label)
     wp_all[label] = {}
@@ -134,11 +132,13 @@ for mstar,coods,Lbox,label,rp_max in zip([galaxy_pred_L100_hydro['Stars_Mass_EA'
         wp_tiles[label][str(lim)] = wp_tiles[label][str(lim)].tolist()
    
 
+
 with open('output/clustering_wp_all.json', 'w') as outfile:
     json.dump(wp_all, outfile)
 
 with open('output/clustering_wp_tiles.json', 'w') as outfile:
     json.dump(wp_tiles, outfile)
+
 
 with open('output/clustering_wp_all.json', 'r') as outfile:
     wp_all = json.load(outfile)
@@ -155,12 +155,12 @@ plt.subplots_adjust(wspace=0.03, hspace=0.03)
 ax2B = zoomed_inset_axes(ax2, zoom=2.3, loc=3)
 
 for ax,lim,fname in zip([ax1,ax2,ax3,ax4], ['9.5', '10', '10.5', '11'], fnames):
-    for Lbox,label,pretty_label,c,rp_max in zip([100*h, 800*h, 100*h, 100*h],
-                             ['Ref-100','Pmill','L100','L100_hydro'],
+    for Lbox,label,pretty_label,c,rp_max in zip([100*h, 800*h, 100*h, 100*h, 800*h],
+                             ['Ref-100','Pmill','L100','L100_hydro','SHAM'],
                              ['L100Ref','L050AGN+Zoom\n(Prediction on\nP-Millennium)',
-                               'L050AGN+Zoom\n(Prediction on\nL100)','L100 Hydro'], 
-                             ['C0','C1','C3','C4'],
-                             [10**1.1, 10**2, 10**1.1, 10**1.1]):
+                               'L050AGN+Zoom\n(Prediction on\nL100)','L100 Hydro','SHAM'], 
+                             ['C0','C1','C3','C4','C5'],
+                             [10**1.1, 10**2, 10**1.1, 10**1.1, 10**2]):
         
         if (label in ['L100','L100_hydro']) & (lim != '10'): continue
         if (label in ['Ref-100']) & (lim == '11'): continue
@@ -227,11 +227,100 @@ lineA = Line2D([0], [0], color='C0')
 lineB = Line2D([0], [0], color='C1')
 lineC = Line2D([0], [0], color='C3')
 lineD = Line2D([0], [0], color='C4')
-ax1.legend([lineGAMA, lineA,lineB], 
-           ['GAMA','L100Ref','L050AGN+Zoom\n(Prediction on\nP-Millennium)'],loc='lower left')
+lineE = Line2D([0], [0], color='C5')
+ax1.legend([lineGAMA, lineA, lineB, lineE], 
+           ['GAMA','L100Ref','L050AGN+Zoom\n(Prediction on\nP-Millennium)', 'SHAM'],loc='lower left')
 ax2.legend([lineC, lineD], 
            ['L050AGN+Zoom\n(Prediction on\nL100 DMO)','L050AGN+Zoom\n(Prediction on\nL100 hydro)'], 
            loc=(0.63,0.58))
 
 plt.show()
 # plt.savefig('plots/clustering.png', dpi=200, bbox_inches='tight')
+
+
+
+
+
+### Single appendix plot
+
+# fig, (ax1,ax2,ax3,ax4) = plt.subplots(1,4,figsize=(15,5))
+fig, ax = plt.subplots(1, 1, figsize=(6, 5))
+lim = '11'
+fname = 'obs_data/farrow15-11.0-mass-11.5-0.24-z-0.35-wprp.dat'
+
+for Lbox,label,pretty_label,c,rp_max in zip([100*h, 800*h, 100*h, 100*h, 800*h],
+                         ['Ref-100','Pmill','L100','L100_hydro','SHAM'],
+                         ['L100Ref','L050AGN+Zoom\n(Prediction on\nP-Millennium)',
+                           'L050AGN+Zoom\n(Prediction on\nL100)','L100 Hydro','SHAM'],
+                         ['C0','C0','C3','C4','C5'],
+                         [10**1.1, 10**2, 10**1.1, 10**1.1, 10**2]):
+
+    if (label in ['L100','L100_hydro']) & (lim != '10'): continue
+    if (label in ['Ref-100']) & (lim == '11'): continue
+
+    _rp_binlims = rp_binlims[rp_binlims < rp_max]
+    _rp_bins = rp_bins[:len(_rp_binlims)-1]
+
+    sigma = np.sqrt(np.sum((np.array(wp_all[label][lim]) - \
+                            np.array(wp_tiles[label][lim]))**2, axis=0) \
+            * (len(np.array(wp_tiles[label][lim])) - 1)/\
+            len(np.array(wp_tiles[label][lim]))) / _rp_bins
+
+    _y = np.array(wp_all[label][lim]) / _rp_bins
+    err = np.array([np.log10(_y) - np.log10(_y - sigma), np.log10(_y + sigma) - np.log10(_y)])
+    uplims = np.isnan(err[0])
+    err[np.isnan(err)] = 0.5
+
+    ax.errorbar(np.log10(_rp_bins), np.log10(wp_all[label][lim] / _rp_bins),
+                yerr=err, capsize=2, c=c)
+    ax.errorbar(np.log10(_rp_bins), np.log10(wp_all[label][lim] / _rp_bins),
+                yerr=err, label=pretty_label, capsize=2, uplims=uplims, c=c)
+
+
+    if lim=='10':
+        ax2B.errorbar(np.log10(_rp_bins), np.log10(wp_all[label][lim] / _rp_bins),
+                      yerr=err,capsize=2, c=c)
+        ax2B.errorbar(np.log10(_rp_bins), np.log10(wp_all[label][lim] / _rp_bins),
+                      yerr=err, label=pretty_label, capsize=2, uplims=uplims, c=c)
+
+
+## obs data    
+_dat = np.loadtxt(fname)
+ax.fill_between(np.log10(_dat[:,0]), np.log10((_dat[:,1]-_dat[:,2])/_dat[:,0]),
+                                     np.log10((_dat[:,1]+_dat[:,2])/_dat[:,0]),
+                                     alpha=0.5, color='grey')
+
+ax.plot(np.log10(_dat[:,0]), np.log10(_dat[:,1]/_dat[:,0]), label='GAMA', color='black')
+if lim == '10':
+    ax2B.fill_between(np.log10(_dat[:,0]), np.log10((_dat[:,1]-_dat[:,2])/_dat[:,0]),
+                      np.log10((_dat[:,1]+_dat[:,2])/_dat[:,0]),
+                      alpha=0.5, color='grey')
+
+    ax2B.plot(np.log10(_dat[:,0]), np.log10(_dat[:,1]/_dat[:,0]),
+                        label='GAMA', color='black')
+
+ax.text(0.93, 0.92, '$%.1f < \mathrm{log_{10}}(M_{\star} / M_{\odot} h^{-2}) < %.1f$'%\
+            (float(lim),float(lim)+0.5), transform=ax.transAxes, size=13, horizontalalignment='right')
+ax.set_xlim(-1.7,2); ax.set_ylim(-3.5,5)
+ax.grid(alpha=0.4)
+
+
+ax.set_ylabel('$\mathrm{log_{10}}(w_{p}(r_{p})\,/\,r_{p})$', size=13)
+ax.set_xlabel('$\mathrm{log_{10}}(r_{p} \,/\, h^{-1} \mathrm{Mpc})$', size=13)
+
+lineGAMA = Line2D([0], [0], color='black')
+lineA = Line2D([0], [0], color='C0')
+lineB = Line2D([0], [0], color='C0')
+lineC = Line2D([0], [0], color='C3')
+lineD = Line2D([0], [0], color='C4')
+lineE = Line2D([0], [0], color='C5')
+ax.legend([lineGAMA, lineB, lineE],
+           ['GAMA','ERT model (L050AGN+Zoom)', 'Isotonic model'],loc='lower left')
+# ax2.legend([lineC, lineD],
+#           ['L050AGN+Zoom\n(Prediction on\nL100 DMO)','L050AGN+Zoom\n(Prediction on\nL100 hydro)'],
+#            loc=(0.63,0.58))
+
+plt.show()
+# plt.savefig('plots/clustering_appendix.png', dpi=200, bbox_inches='tight')
+
+

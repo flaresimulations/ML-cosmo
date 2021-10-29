@@ -54,6 +54,7 @@ etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
 galaxy_pred_L0050 = pd.DataFrame(predictor_scaler.inverse_transform(\
                            etree.predict(feature_scaler.transform(\
                            dmo[features]))),columns=predictors)
+                       
 
 ####
 
@@ -67,6 +68,24 @@ etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
 galaxy_pred_L0050_zoom = pd.DataFrame(predictor_scaler.inverse_transform(\
                            etree.predict(feature_scaler.transform(\
                            dmo[features]))),columns=predictors)
+
+                           
+#### HOD predictions
+from sklearn.isotonic import IsotonicRegression
+ir = IsotonicRegression(out_of_bounds="clip")
+
+feat = 'M_DM' # 'Vmax_DM'
+pred = 'Stars_Mass_EA'
+
+ir.fit(np.log10(eagle[feat]), eagle[pred])
+# p = np.polyfit(np.log10(eagle[feat]), eagle[pred], deg=1)
+# print(pred, len(p))
+# _y = p[0]*_x + p[1]
+_new_x = np.log10(dmo[feat])
+# sham_pred = p[0]*_new_x + p[1]
+sham_pred = ir.predict(_new_x)
+
+
 
 def calc_df(x, binLimits, volume):
     hist, dummy = np.histogram(x, bins = binLimits)
@@ -89,8 +108,8 @@ def plot_df(ax, _mstar, binLimits, V, label=None, color='C0', lw=3, ls='solid'):
 
 
 
-binLimits = np.linspace(4.9, 13.9, 31)
-bins = np.linspace(5.05, 13.75, 30)
+binLimits = np.linspace(4.9, 17.8, 44)
+bins = np.linspace(5.05, 17.65, 43)
 
 fig, ax = plt.subplots(1,1, figsize=(6,7))
 lw = 3
@@ -114,6 +133,8 @@ plot_df(ax, galaxy_pred_L0050_zoom['Stars_Mass_EA'], binLimits, pmill_V,
 # phi_pred_zoom, phi_sigma= calc_df(galaxy_pred_L0050_zoom['Stars_Mass_EA'], binLimits, pmill_V)
 # ax.plot(bins, np.log10(phi_pred_zoom), label='L050AGN+Zoom\n(Prediction on P-Millennium)', 
 #         lw=lw, c='C0')
+
+plot_df(ax, sham_pred, binLimits, pmill_V, label='SHAM', color='C5')
 
 ax.axvspan(7, 8, alpha=0.1, color='grey')
 

@@ -153,7 +153,7 @@ for i,predictor in enumerate(predictors):
 
 
 
-predictors_pretty = ['$M_{\cdot} \,/\, M_{\odot}$',
+predictors_pretty = ['$M_{\\bullet} \,/\, M_{\odot}$',
                      '$M_{\mathrm{gas}} \,/\, M_{\odot}$',
                      '$M_{\star} \,/\, M_{\odot}$',
                      '$Z_{\star}$',
@@ -164,14 +164,14 @@ predictors_pretty = ['$M_{\cdot} \,/\, M_{\odot}$',
 H = np.array([[_out[predictor][feature] for feature in features] for predictor in predictors])
 _H = H.T / H.max(axis=1)
 
-fig, ax = plt.subplots(1,1,figsize=(5, 6))
+fig, ax = plt.subplots(1,1,figsize=(3.5, 4.6))
 plt.imshow(_H)
 
-pos = np.arange(len(idx))
+# pos = np.arange(len(idx))
 plt.yticks(np.arange(len(features)), features_pretty)#, rotation='vertical')
 plt.xticks(np.arange(len(predictors)), predictors_pretty, rotation='vertical')
 
-cax = fig.add_axes([0.14, 0.12, 0.88, 0.75])
+cax = fig.add_axes([0.16, 0.12, 0.92, 0.75])
 cax.get_xaxis().set_visible(False)
 cax.get_yaxis().set_visible(False)
 cax.patch.set_alpha(0)

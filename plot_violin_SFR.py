@@ -10,14 +10,22 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 import seaborn as sns
 
 from sim_details import mlcosmo
-# mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
-zoom = True
-density = False
+# # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini='config/config_flares.ini')
+mlc.sim_name = 'flares'
+model_dir = 'models/'
+output_name = mlc.sim_name
+
+
+# from sim_details import mlcosmo
+# # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+# mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
+# zoom = True
+# density = False
 output = 'models/'
-output_name = mlc.sim_name 
-if zoom: output_name += '_zoom'
-if density: output_name += '_density'
+# output_name = mlc.sim_name 
+# if zoom: output_name += '_zoom'
+# if density: output_name += '_density'
 
 etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
         pickle.load(open(output + output_name + '_' + mlc.tag + '_ert.model', 'rb'))
@@ -95,7 +103,7 @@ ax2.text(0.24, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}
 ax3.text(0.1, -0.1, '$\\frac{\mathrm{SFR_{eagle}}}{\mathrm{M_{\odot}\, yr^{-1}}} < 10^{-3}$', 
          size=14, transform=ax3.transAxes)
 
-plt.show()
-# fname = 'plots/violins_SFR_%s.png'%mlc.sim_name; print(fname)
-# plt.savefig(fname, dpi=150, bbox_inches='tight')
+# plt.show()
+fname = 'plots/violins_SFR_%s.png'%mlc.sim_name; print(fname)
+plt.savefig(fname, dpi=150, bbox_inches='tight')
 

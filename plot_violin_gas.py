@@ -10,14 +10,21 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 import seaborn as sns
 
 from sim_details import mlcosmo
-# mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
-zoom = True
-density = False
+# # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini='config/config_flares.ini')
+mlc.sim_name = 'flares'
+model_dir = 'models/'
+output_name = mlc.sim_name
+
+# from sim_details import mlcosmo
+# # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+# mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
+# zoom = True
+# density = False
 output = 'models/'
-output_name = mlc.sim_name 
-if zoom: output_name += '_zoom'
-if density: output_name += '_density'
+# output_name = mlc.sim_name 
+# if zoom: output_name += '_zoom'
+# if density: output_name += '_density'
 
 etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
         pickle.load(open(output + output_name + '_' + mlc.tag + '_ert.model', 'rb'))

@@ -9,15 +9,16 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 
 
 from sim_details import mlcosmo
-# mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
-mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
+# # mlc = mlcosmo(ini='config/config_cosma_L0100N1504.ini')
+mlc = mlcosmo(ini='config/config_flares.ini')
 
 model_dir = 'models/'
-zoom = True #False
-density = True #False
-output_name = mlc.sim_name
-if zoom: output_name += '_zoom'
-if density: output_name += '_density'
+output_name = 'flares' # mlc.sim_name
+# zoom = True #False
+# density = True #False
+# output_name = mlc.sim_name
+# if zoom: output_name += '_zoom'
+# if density: output_name += '_density'
 
 
 etree, features, predictors, feature_scaler, predictor_scaler, eagle =\
@@ -89,7 +90,8 @@ for ax,pred,pretty,_lims in zip(axes, preds, preds_pretty, ax_lims):
 
 
 # plt.show()
-fname = 'plots/joint_plots_%s.pdf'%mlc.sim_name; print(fname)
+# fname = 'plots/joint_plots_%s.pdf'%mlc.sim_name; print(fname)
+fname = 'plots/joint_plots_%s.pdf'%'flares'; print(fname)
 plt.savefig(fname, dpi=300, bbox_inches='tight'); plt.close()
 
 

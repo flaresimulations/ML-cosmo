@@ -1,0 +1,41 @@
+#! /bin/bash
+#SBATCH -A dp004
+#SBATCH -p cosma7
+#SBATCH -t 0-06:00
+#SBATCH --cpus-per-task=1
+#SBATCH --array=0-15
+#SBATCH --job-name=dmo_match_FL
+#SBATCH --output=logs/FL.%a.%N.%j.o
+#SBATCH --error=logs/FL.%a.%N.%j.e
+
+# #SBATCH --job-name=dmo_match_L0050N0752
+# #SBATCH --output=logs/L0050N0752.%a.%N.%j.o
+# #SBATCH --error=logs/L0050N0752.%a.%N.%j.e
+
+# #SBATCH --job-name=dmo_match_L0100N1504
+# #SBATCH --output=logs/L0100N1504.%a.%N.%j.o
+# #SBATCH --error=logs/L0100N1504.%a.%N.%j.e
+ 
+module load pythonconda3/2020-02 # pythonconda3/4.5.4
+source activate eagle3p9
+
+# python match_run.py config/config_CE-0.ini $SLURM_ARRAY_TASK_ID 16 
+# python match_run.py config/config_CE-24.ini $SLURM_ARRAY_TASK_ID 16 
+# python match_run.py config/config_cosma_L0100N1504.ini $SLURM_ARRAY_TASK_ID 16
+
+# # config=config/config_cosma_L0050N0752.ini
+# config=config/config_cosma_L0100N1504.ini
+config=config/config_flares.ini
+
+# python match_run.py $config $SLURM_ARRAY_TASK_ID 16 
+python match_run.py $config --region 30 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 31 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 32 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 33 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 34 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 35 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 36 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 37 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 38 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+python match_run.py $config --region 39 --rank $SLURM_ARRAY_TASK_ID --jobs 16
+

@@ -1,0 +1,22 @@
+#! /bin/bash
+#SBATCH -A dp004
+#SBATCH -p cosma7
+#SBATCH --job-name=flares_ml_match_download
+#SBATCH --output=logs/flares_match_get_data.%a.%N.%j.o
+#SBATCH --error=logs/flares_match_get_data.%a.%N.%j.e
+#SBATCH -t 0-00:10
+#SBATCH --array=2-39
+#SBATCH --cpus-per-task=1
+
+# #SBATCH --tasks-per-node=28
+# #SBATCH --output=logs/L0100N1504.%a.%N.%j.o
+# #SBATCH --error=logs/L0100N1504.%a.%N.%j.e
+
+module load pythonconda3/2020-02
+source activate eagle3p9
+
+# python match_get_data.py config/config_cosma_L0050N0752.ini
+# python match_get_data.py config/config_cosma_L0100N1504.ini
+
+python match_get_data.py config/config_flares.ini --region $SLURM_ARRAY_TASK_ID
+

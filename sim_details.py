@@ -4,19 +4,30 @@ from scipy.stats import binned_statistic
 
 class mlcosmo:
 
-    def __init__(self, ini='config/config_L0012N0376.ini'):
+    def __init__(self, ini='config/config_L0012N0376.ini', region=None, tag=None):
         """
         ini: config file string
         """
         
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config.read(ini)
+
+        if region is not None:
+            config['Simulation details']['sim_name'] = \
+                    config['Simulation details']['sim_name']%int(region)
+            config['Simulation details']['sim_hydro'] = \
+                    config['Simulation details']['sim_hydro']%int(region)
+            config['Simulation details']['sim_dmo'] = \
+                    config['Simulation details']['sim_dmo']%int(region)
+
+        if tag is not None:
+            config['Simulation details']['tag'] = tag
 
         ## Sim details
         self.sim_name = config['Simulation details']['sim_name']
-        self.sim_directory = config['Simulation details']['sim_directory']
-        self.sim_hydro = self.sim_directory + config['Simulation details']['sim_hydro']
-        self.sim_dmo = self.sim_directory + config['Simulation details']['sim_dmo']
+        # self.sim_directory = config['Simulation details']['sim_directory']
+        self.sim_hydro = config['Simulation details']['sim_hydro']
+        self.sim_dmo = config['Simulation details']['sim_dmo']
         self.tag = config['Simulation details']['tag']
         self.boxsize = float(config['Simulation details']['boxsize'])
 

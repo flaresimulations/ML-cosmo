@@ -5,17 +5,25 @@
 import numpy as np
 import math
 import sys
-import pickle
+import h5py
+# import pickle
 
 import eagle_IO.eagle_IO as E
 
-_config = str(sys.argv[1])
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("config", help="config file", type=str)
+parser.add_argument("--region", help="if a flares zoom region, provide the region number", 
+                    type=int, default=None)
+parser.add_argument("--tag", help="snapshot tag string", type=str, default=None)
+args = parser.parse_args()
 
 from sim_details import mlcosmo
-mlc = mlcosmo(ini=_config)
+mlc = mlcosmo(ini=args.config, region=args.region, tag=args.tag)
 
 
-print("==========\nSim: %s\nTag: %s\n===========\n"%(_config,mlc.tag))
+print("==========\nSim: %s\nTag: %s\n===========\n"%(mlc.sim_name,mlc.tag))
 
 output_folder = 'output/'
 nthr = 8
@@ -79,14 +87,19 @@ del(particleIDs_EA,particleIDs_DM)
 del(offset_EA,offset_DM,length_EA,length_DM)
 
 
-pickle.dump([M_EA,M_DM,CoP_EA,CoP_DM,bound_particles_EA,
-             particles_EA,particles_DM,Grp_EA,Sub_EA,Grp_DM,Sub_DM],
-            open(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.p",'wb'))
+with h5py.File(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.h5", 'w') as hf:
+    hf.create_dataset('M_EA', data=M_EA)
+    hf.create_dataset('M_DM', data=M_DM)
+    hf.create_dataset('CoP_EA', data=CoP_EA)
+    hf.create_dataset('CoP_DM', data=CoP_DM)
+    hf.create_dataset('bound_particles_EA', data=bound_particles_EA)
+    hf.create_dataset('Grp_EA', data=Grp_EA)
+    hf.create_dataset('Grp_DM', data=Grp_DM)
+    hf.create_dataset('Sub_EA', data=Sub_EA)
+    hf.create_dataset('Sub_DM', data=Sub_DM)
 
-# pickle.dump([M_EA,CoP_EA,bound_particles_EA,particles_EA,Grp_EA,Sub_EA],
-#             open(output_folder + mlc.sim_name + "_match_data_EA.p",'wb'))
-# 
-# pickle.dump([M_DM,CoP_DM,particles_DM,Grp_DM,Sub_DM],
-#             open(output_folder + mlc.sim_name + "_match_data_DM.p",'wb'))
+    dt = h5py.vlen_dtype(np.dtype('int64'))  # variable length for ragged arrays
+    hf.create_dataset('particles_EA', data=particles_EA, dtype=dt)
+    hf.create_dataset('particles_DM', data=particles_DM, dtype=dt)
 
 

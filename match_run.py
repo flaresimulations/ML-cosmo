@@ -1,30 +1,55 @@
 # This code was adapted from the python examples on the Eagle wiki given here:
 # http://eagle.strw.leidenuniv.nl/wiki/doku.php?id=eagle:documentation:reading_python&s[]=bound
 
-import pickle
-
-import pandas as pd 
-import numpy as np
+import argparse
 import math
 import sys
 
+import h5py
+import pandas as pd 
+import numpy as np
+
 import eagle_IO.eagle_IO as E
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("config", help="config file", type=str)
+parser.add_argument("--region", help="if a flares zoom region, provide the region number",
+                    type=int, default=None)
+parser.add_argument("--tag", help="snapshot tag string", type=str, default=None)
+parser.add_argument("--rank", help="processor rank", type=int, default=None)
+parser.add_argument("--jobs", help="total number of jobs", type=int, default=None)
+args = parser.parse_args()
+
 from sim_details import mlcosmo
-_config = str(sys.argv[1])
-mlc = mlcosmo(ini=_config)
+mlc = mlcosmo(ini=args.config, region=args.region, tag=args.tag)
 
 output_folder = 'output/'
 
-## serial arguments
-# rank = 0
-# jobs = 1
-rank = int(sys.argv[2])  # rank of process
-jobs = int(sys.argv[3])  # total number of processes
+if args.rank is not None: rank = args.rank
+else: rank = 0
 
-M_EA,M_DM,CoP_EA,CoP_DM,bound_particles_EA,\
-   particles_EA,particles_DM,Grp_EA,Sub_EA,Grp_DM,Sub_DM = \
-   pickle.load(open(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.p",'rb'))
+if args.jobs is not None: jobs = args.jobs
+else: jobs = 1
+
+
+with h5py.File(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.h5", 'r') as hf:
+    M_EA = hf['M_EA'][:]
+    M_DM = hf['M_DM'][:]
+    CoP_EA = hf['CoP_EA'][:]
+    CoP_DM = hf['CoP_DM'][:]
+    bound_particles_EA = hf['bound_particles_EA'][:]
+    Grp_EA = hf['Grp_EA'][:]
+    Grp_DM = hf['Grp_DM'][:]
+    Sub_EA = hf['Sub_EA'][:]
+    Sub_DM = hf['Sub_DM'][:]
+    particles_EA = hf['particles_EA'][:]
+    particles_DM = hf['particles_DM'][:]
+
+
+# M_EA,M_DM,CoP_EA,CoP_DM,bound_particles_EA,\
+#    particles_EA,particles_DM,Grp_EA,Sub_EA,Grp_DM,Sub_DM = \
+#    pickle.load(open(output_folder + mlc.sim_name + '_' + mlc.tag + "_match_data.p",'rb'))
 
 
 
@@ -55,6 +80,7 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
     print(np.round((float(i)/len(M_EA)),4) * 100,'% complete')
     sys.stdout.flush()
 
+    _match_flag = False
     print("Finding a match for halo (", Grp_EA[i], ",", Sub_EA[i], 
           ") log10(M)=%.3f"%np.log10(M_EA[i]))
 
@@ -72,7 +98,8 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
         dm_list = np.array(dm_list)[not_matched]
 
     # dm_list = np.delete(dm_list,matched_DM)
-    # if len(dm_list) == 0: next
+    # if len(dm_list) == 0:
+    #     print("No match found.")
 
     for j in dm_list:
         # Check whether the IDs from i are in j
@@ -108,19 +135,18 @@ for n,i in enumerate(range(rank, np.size(M_EA), jobs)):
                 }
                 output.append(_out)
                 matched_DM.append(j)
-                continue
+                _match_flag = True
+                break # continue
 
             else:
                 print("Match not confirmed. Reversed count:", reversed_count)
             break
         else:
-            print("No match found")
+            continue
+    
+    if not _match_flag: print("No match found")
 
 
 _df = pd.DataFrame(output)
 _df.to_csv(output_folder+"matchedHalosSub_%s_%s.%03d.dat"%(mlc.sim_name, mlc.tag, rank))
 
-
-# file = open(, 'w')
-# file.write(output)
-# file.close()

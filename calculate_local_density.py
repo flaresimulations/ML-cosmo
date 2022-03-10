@@ -7,12 +7,28 @@ from scipy.spatial import cKDTree
 
 import eagle_IO.eagle_IO as E
 
+# from sim_details import mlcosmo
+# _config = str(sys.argv[1])
+# mlc = mlcosmo(ini=_config)
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("config", help="config file", type=str)
+parser.add_argument("--region", help="if a flares zoom region, provide the region number",
+                    type=int, default=None)
+parser.add_argument("--tag", help="snapshot tag string", type=str, default=None)
+parser.add_argument("--zoom", help="zoom region bool", action='store_true')
+args = parser.parse_args()
+
 from sim_details import mlcosmo
-_config = str(sys.argv[1])
-mlc = mlcosmo(ini=_config)
+mlc = mlcosmo(ini=args.config, region=args.region, tag=args.tag)
 
 
-zoom=bool(int(sys.argv[2]))
+print("==========\nSim: %s\nTag: %s\n===========\n"%(mlc.sim_name,mlc.tag))
+
+
+zoom=args.zoom
 boxsize=mlc.boxsize # float(sys.argv[2])
 nthr=8
 

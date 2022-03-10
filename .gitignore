@@ -1,3 +1,4 @@
+output/*.h5
 output/*.csv
 output/*.dat
 output/*.txt

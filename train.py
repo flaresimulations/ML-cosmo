@@ -16,38 +16,53 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-from sim_details import mlcosmo
-mlc = mlcosmo(ini=sys.argv[1])
-# mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
+import argparse
+
 output = 'output/'
 model_dir = 'models/'
 
+parser = argparse.ArgumentParser()
+parser.add_argument("config", help="config file", type=str)
+parser.add_argument("--tag", help="snapshot tag string", type=str, default=None)
+parser.add_argument("--density", help="download local density features", action='store_true')
+args = parser.parse_args()
 
-zoom = bool(int(sys.argv[2]))
-density = bool(int(sys.argv[3]))
-output_name = mlc.sim_name
-if zoom: output_name += '_zoom'
-if density: output_name += '_density'
+from sim_details import mlcosmo
+mlc = mlcosmo(ini=args.config, tag=args.tag)
+
+
+# from sim_details import mlcosmo
+# mlc = mlcosmo(ini=sys.argv[1])
+# # mlc = mlcosmo(ini='config/config_cosma_L0050N0752.ini')
+
+
+# zoom = bool(int(sys.argv[2]))
+# density = bool(int(sys.argv[3]))
+output_name = 'flares' #mlc.sim_name
+if args.density: output_name += '_density'
 print(output_name)
 
-eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
+# eagle = pd.read_csv((output + mlc.sim_name + '_' + mlc.tag + "_match.csv"))
 # eagle['Density_R1'] *= mlc.unitMass
 # eagle['Density_R2'] *= mlc.unitMass
 # eagle['Density_R4'] *= mlc.unitMass
 # eagle['Density_R8'] *= mlc.unitMass
 # eagle['Density_R16'] *= mlc.unitMass
 
-
-if zoom:
+# if args.zoom:
     # if density: 
     #     files = [output+'CE%i_029_z000p000_match.csv'%i for i in np.arange(8)]
     # else: 
     # files = glob.glob(output+'CE*_%s_match.csv'%mlc.tag)
-    files = glob.glob(output+'CE*_026_z000p101_match.csv')
+    # files = glob.glob(output+'CE*_026_z000p101_match.csv')
 
-    for f in files:
-        _dat = pd.read_csv(f)
-        eagle = pd.concat([eagle,_dat])
+files = glob.glob(f'{output}FL*_{mlc.tag}_match.csv')
+
+for i,f in enumerate(files):
+    _dat = pd.read_csv(f)
+    if i==0: eagle = _dat
+    eagle = pd.concat([eagle,_dat])
+
 
 
 eagle['velocity_DM'] = abs(eagle['velocity_DM'])
@@ -69,7 +84,7 @@ features_pretty = ['$M_{\mathrm{Crit,200}}$',
                    '$E_{\mathrm{pot}}$',
                    '$R_{v_{\mathrm{max}}}$',
                    'Satellite?']
-if density:
+if args.density:
     [features.append(d) for d in ['Density_R1','Density_R2','Density_R4','Density_R8']]#,'Density_R16']]
     [features_pretty.append(d) for d in ['$\\rho (R = 1 \, \mathrm{Mpc})$',
                                          '$\\rho (R = 2 \, \mathrm{Mpc})$',

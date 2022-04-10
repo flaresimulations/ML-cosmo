@@ -18,5 +18,5 @@ source activate eagle3p9
 # python match_get_data.py config/config_cosma_L0050N0752.ini
 # python match_get_data.py config/config_cosma_L0100N1504.ini
 
-python match_get_data.py config/config_flares.ini --region $SLURM_ARRAY_TASK_ID
+python match_get_data.py config/config_flares.ini --region $SLURM_ARRAY_TASK_ID --tag 009_z006p000
 

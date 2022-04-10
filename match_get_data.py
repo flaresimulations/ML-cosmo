@@ -1,12 +1,11 @@
 # This code was adapted from the python examples on the Eagle wiki given here:
 # http://eagle.strw.leidenuniv.nl/wiki/doku.php?id=eagle:documentation:reading_python&s[]=bound
 
-
+import os
 import numpy as np
 import math
 import sys
 import h5py
-# import pickle
 
 import eagle_IO.eagle_IO as E
 
@@ -25,7 +24,11 @@ mlc = mlcosmo(ini=args.config, region=args.region, tag=args.tag)
 
 print("==========\nSim: %s\nTag: %s\n===========\n"%(mlc.sim_name,mlc.tag))
 
-output_folder = 'output/'
+output_folder = 'output/%s/'%mlc.tag
+if not os.path.isdir(output_folder):
+    print("Creating folder:", output_folder)
+    os.mkdir(output_folder)
+
 nthr = 8
 
 
